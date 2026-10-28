@@ -10,7 +10,7 @@ from app.core.config import get_settings
 from app.core.errors import register_error_handlers
 from app.core.logging import REQUEST_ID_HEADER, RequestIdMiddleware, configure_logging
 from app.db.session import init_db
-from app.routers import cases, health, sandbox, screenings
+from app.routers import cases, health, sandbox, screenings, workflow
 from app.services.inference import load_models
 
 logger = logging.getLogger(__name__)
@@ -58,6 +58,7 @@ def create_app() -> FastAPI:
     app.include_router(sandbox.router, prefix=API_PREFIX)
     app.include_router(cases.router, prefix=API_PREFIX)
     app.include_router(screenings.router, prefix=API_PREFIX)
+    app.include_router(workflow.router, prefix=API_PREFIX)
     return app
 
 
