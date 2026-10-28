@@ -1,0 +1,12 @@
+# Placeholder: real schedules (/healthz every 10 min, /healthz/db daily, /internal/tick every 15 min)
+# are added in M11 once the backend URL exists. Manual trigger only for now.
+name: keepalive
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "keepalive is configured in M11"

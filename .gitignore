@@ -1,0 +1,36 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+*.db
+*.sqlite
+*.sqlite3
+
+# ML intermediate data (regenerated deterministically by ml/data/generate.py)
+ml/data/out/
+*.parquet
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+apps/web/test-results/
+apps/web/playwright-report/
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
