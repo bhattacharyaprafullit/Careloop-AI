@@ -301,6 +301,38 @@
     ],
     "units": "log-odds"
   },
+  "simulation": {
+    "careloop": {
+      "median_days": 33.67,
+      "unresolved_day60": 0.0867
+    },
+    "ci95": {
+      "careloop_median_days": [
+        31.29,
+        36.0
+      ],
+      "careloop_unresolved_day60": [
+        0.0471,
+        0.1333
+      ],
+      "fifo_median_days": [
+        33.42,
+        39.79
+      ],
+      "fifo_unresolved_day60": [
+        0.0833,
+        0.1722
+      ]
+    },
+    "cohort_size": 180,
+    "daily_navigator_capacity": 18,
+    "fifo": {
+      "median_days": 36.5,
+      "unresolved_day60": 0.1252
+    },
+    "label": "Synthetic queue simulation (fixed navigator capacity, 100 runs)",
+    "runs": 100
+  },
   "splits": {
     "calibration_patients": 1800,
     "calibration_rows": 11098,
