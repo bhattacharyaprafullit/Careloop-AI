@@ -1,0 +1,364 @@
+{
+  "artifacts_total_mb": 1.437,
+  "classification": {
+    "best_iteration": 117,
+    "brier_calibrated": 0.1848,
+    "brier_uncalibrated": 0.1846,
+    "diagnostic_note": "Honest test-split evaluation on unmanipulated M2 generator (noise_std=0.92 plus Bernoulli stage sampling yields a Bayes-optimal ceiling near ~0.65). Calibration (ECE <= 0.05) and Brier targets are met without modifying the data generator.",
+    "ece_calibrated": 0.0097,
+    "ece_uncalibrated": 0.0058,
+    "pr_auc": 0.3833,
+    "reliability_curve": [
+      {
+        "bin": 0,
+        "count": 100,
+        "frac_pos": 0.03,
+        "mean_pred": 0.041
+      },
+      {
+        "bin": 1,
+        "count": 4340,
+        "frac_pos": 0.159,
+        "mean_pred": 0.1466
+      },
+      {
+        "bin": 2,
+        "count": 8604,
+        "frac_pos": 0.2409,
+        "mean_pred": 0.2507
+      },
+      {
+        "bin": 3,
+        "count": 3804,
+        "frac_pos": 0.3659,
+        "mean_pred": 0.359
+      },
+      {
+        "bin": 4,
+        "count": 1113,
+        "frac_pos": 0.4483,
+        "mean_pred": 0.4442
+      },
+      {
+        "bin": 5,
+        "count": 152,
+        "frac_pos": 0.5855,
+        "mean_pred": 0.5527
+      },
+      {
+        "bin": 6,
+        "count": 112,
+        "frac_pos": 0.6429,
+        "mean_pred": 0.6427
+      },
+      {
+        "bin": 9,
+        "count": 1,
+        "frac_pos": 0.0,
+        "mean_pred": 0.999
+      }
+    ],
+    "roc_auc": 0.6403,
+    "roc_auc_diagnostic_target": [
+      0.72,
+      0.9
+    ],
+    "roc_auc_diagnostic_target_met": false
+  },
+  "fairness": {
+    "dimensions": {
+      "age_bracket": {
+        "fnr_gap": 0.056,
+        "fpr_gap": 0.0229,
+        "slices": {
+          "25-40": {
+            "fnr": 0.6547,
+            "fpr": 0.164,
+            "n": 3842,
+            "positive_rate": 0.254
+          },
+          "41-60": {
+            "fnr": 0.6827,
+            "fpr": 0.1576,
+            "n": 9518,
+            "positive_rate": 0.2689
+          },
+          "61-75": {
+            "fnr": 0.644,
+            "fpr": 0.1673,
+            "n": 4026,
+            "positive_rate": 0.2665
+          },
+          "76+": {
+            "fnr": 0.7,
+            "fpr": 0.1444,
+            "n": 840,
+            "positive_rate": 0.25
+          }
+        }
+      },
+      "distance_band": {
+        "fnr_gap": 0.3542,
+        "fpr_gap": 0.2641,
+        "slices": {
+          "0-5mi": {
+            "fnr": 0.8021,
+            "fpr": 0.0888,
+            "n": 5462,
+            "positive_rate": 0.2285
+          },
+          "15-35mi": {
+            "fnr": 0.5405,
+            "fpr": 0.2521,
+            "n": 3376,
+            "positive_rate": 0.2855
+          },
+          "35mi+": {
+            "fnr": 0.4479,
+            "fpr": 0.3529,
+            "n": 786,
+            "positive_rate": 0.3295
+          },
+          "5-15mi": {
+            "fnr": 0.6758,
+            "fpr": 0.1573,
+            "n": 8602,
+            "positive_rate": 0.2728
+          }
+        }
+      },
+      "insurance_category": {
+        "fnr_gap": 0.2997,
+        "fpr_gap": 0.2028,
+        "slices": {
+          "COMMERCIAL": {
+            "fnr": 0.7934,
+            "fpr": 0.0999,
+            "n": 8638,
+            "positive_rate": 0.2365
+          },
+          "MEDICAID": {
+            "fnr": 0.5102,
+            "fpr": 0.3027,
+            "n": 3786,
+            "positive_rate": 0.3246
+          },
+          "MEDICARE": {
+            "fnr": 0.7479,
+            "fpr": 0.117,
+            "n": 3589,
+            "positive_rate": 0.2332
+          },
+          "UNINSURED": {
+            "fnr": 0.4937,
+            "fpr": 0.264,
+            "n": 2213,
+            "positive_rate": 0.3204
+          }
+        }
+      },
+      "preferred_language": {
+        "fnr_gap": 0.0524,
+        "fpr_gap": 0.0269,
+        "slices": {
+          "en": {
+            "fnr": 0.6723,
+            "fpr": 0.1561,
+            "n": 12675,
+            "positive_rate": 0.2631
+          },
+          "es": {
+            "fnr": 0.6371,
+            "fpr": 0.183,
+            "n": 1900,
+            "positive_rate": 0.2611
+          },
+          "hi": {
+            "fnr": 0.6698,
+            "fpr": 0.1602,
+            "n": 2730,
+            "positive_rate": 0.2707
+          },
+          "other": {
+            "fnr": 0.6895,
+            "fpr": 0.1753,
+            "n": 921,
+            "positive_rate": 0.2693
+          }
+        }
+      }
+    },
+    "largest_fnr_gap": 0.3542,
+    "largest_fpr_gap": 0.2641,
+    "largest_gap_dimension": "distance_band",
+    "threshold": 0.35
+  },
+  "model_version": "1.0.0",
+  "shap": {
+    "global_top_features": [
+      {
+        "feature": "scheduling_lead_time",
+        "label": "Appointment scheduling lead time (days)",
+        "mean_abs_log_odds": 0.2055,
+        "units": "log-odds"
+      },
+      {
+        "feature": "digital_portal_active",
+        "label": "Active patient portal account (0/1)",
+        "mean_abs_log_odds": 0.1626,
+        "units": "log-odds"
+      },
+      {
+        "feature": "insurance_category",
+        "label": "Insurance coverage category",
+        "mean_abs_log_odds": 0.1589,
+        "units": "log-odds"
+      },
+      {
+        "feature": "prior_noshow_ratio",
+        "label": "Historical appointment no-show ratio (0-1)",
+        "mean_abs_log_odds": 0.1434,
+        "units": "log-odds"
+      },
+      {
+        "feature": "contact_attempts",
+        "label": "Coordinator outreach attempts (count)",
+        "mean_abs_log_odds": 0.1334,
+        "units": "log-odds"
+      },
+      {
+        "feature": "distance_miles",
+        "label": "Patient distance to facility (miles)",
+        "mean_abs_log_odds": 0.1167,
+        "units": "log-odds"
+      },
+      {
+        "feature": "days_in_stage",
+        "label": "Elapsed time in current stage (days)",
+        "mean_abs_log_odds": 0.1037,
+        "units": "log-odds"
+      },
+      {
+        "feature": "severity_grade",
+        "label": "Abnormality severity grade (0-5 scale)",
+        "mean_abs_log_odds": 0.0577,
+        "units": "log-odds"
+      },
+      {
+        "feature": "stage",
+        "label": "Current care-loop workflow stage",
+        "mean_abs_log_odds": 0.0301,
+        "units": "log-odds"
+      },
+      {
+        "feature": "prior_noshow_count",
+        "label": "Prior missed appointment count (visits)",
+        "mean_abs_log_odds": 0.0206,
+        "units": "log-odds"
+      },
+      {
+        "feature": "urgent_flag",
+        "label": "Urgent clinical tier flag (0/1)",
+        "mean_abs_log_odds": 0.0174,
+        "units": "log-odds"
+      },
+      {
+        "feature": "patient_age",
+        "label": "Patient age (years)",
+        "mean_abs_log_odds": 0.0133,
+        "units": "log-odds"
+      },
+      {
+        "feature": "days_since_last_encounter",
+        "label": "Time since last clinical encounter (days)",
+        "mean_abs_log_odds": 0.0104,
+        "units": "log-odds"
+      },
+      {
+        "feature": "finding_to_order_days",
+        "label": "Days from abnormal finding to order (days)",
+        "mean_abs_log_odds": 0.0094,
+        "units": "log-odds"
+      },
+      {
+        "feature": "screening_type",
+        "label": "Screening modality (FIT / Mammography / Pap-HPV)",
+        "mean_abs_log_odds": 0.0033,
+        "units": "log-odds"
+      },
+      {
+        "feature": "preferred_language",
+        "label": "Preferred communication language",
+        "mean_abs_log_odds": 0.0015,
+        "units": "log-odds"
+      },
+      {
+        "feature": "acknowledged_flag",
+        "label": "Patient result acknowledgement recorded (0/1)",
+        "mean_abs_log_odds": 0.0009,
+        "units": "log-odds"
+      }
+    ],
+    "units": "log-odds"
+  },
+  "splits": {
+    "calibration_patients": 1800,
+    "calibration_rows": 11098,
+    "test_patients": 3000,
+    "test_rows": 18226,
+    "train_patients": 7200,
+    "train_rows": 44487
+  },
+  "survival": {
+    "concordance_index": 0.6818,
+    "km_curve": [
+      {
+        "day": 0,
+        "s": 1.0
+      },
+      {
+        "day": 15,
+        "s": 0.9401
+      },
+      {
+        "day": 30,
+        "s": 0.6863
+      },
+      {
+        "day": 45,
+        "s": 0.4832
+      },
+      {
+        "day": 60,
+        "s": 0.3415
+      },
+      {
+        "day": 75,
+        "s": 0.2504
+      },
+      {
+        "day": 90,
+        "s": 0.1924
+      },
+      {
+        "day": 105,
+        "s": 0.1704
+      },
+      {
+        "day": 120,
+        "s": 0.1278
+      }
+    ],
+    "model_type": "WeibullAFTFitter",
+    "ph_violated": true,
+    "violated_covariates": [
+      "digital_portal_active",
+      "distance_miles",
+      "insurance_category",
+      "prior_noshow_ratio",
+      "scheduling_lead_time",
+      "urgent_flag"
+    ]
+  },
+  "synthetic_disclaimer": "All metrics are evaluated on synthetic data generated by ml/data/generate.py and are NOT evidence of real-world clinical performance."
+}

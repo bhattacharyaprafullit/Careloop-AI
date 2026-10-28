@@ -11,3 +11,4 @@ Conservative defaults chosen where the spec is ambiguous or conflicts with the e
 | 5 | M0 | Unhandled exceptions return 500 with the standard envelope (`internal_error`). | Spec code list omits 500, but a raw stack trace must never reach the client. |
 | 6 | M0 | Frontend uses a system font stack instead of `next/font/google`. | Avoids a network fetch at build time and supports Devanagari via local fonts. |
 | 7 | M0 | Request-ID middleware is pure ASGI and lives in `core/logging.py`. | The tree has no middleware module; pure ASGI keeps SSE streaming intact. |
+| 8 | M3 | Keep M2 data generator untouched and report honest test ROC-AUC (0.6403) alongside the [0.72, 0.90] diagnostic target; fall back to `WeibullAFTFitter` when `proportional_hazard_test` flags `p < 0.01`. | Build instructions explicitly forbid manipulating the data generator or evaluation to force a threshold pass; calibrated ECE (0.0097 <= 0.05) and Brier (0.1848) pass directly. |
