@@ -45,6 +45,8 @@ from app.schemas.cases import (
     ShapPayload,
     SummaryPayload,
 )
+from app.schemas.patient import CloseCaseRequest
+from app.services.closure_service import close_case_with_gate
 from app.services.events import get_case_timeline, record_event
 from app.services.inference import get_loaded_models, score_case
 
@@ -630,3 +632,21 @@ def stream_case_events(
         yield f"event: done\ndata: {done_payload}\n\n"
 
     return StreamingResponse(_event_gen(), media_type="text/event-stream")
+
+
+@router.post("/cases/{case_id}/close")
+def close_case(
+    case_id: str,
+    body: CloseCaseRequest,
+    db: DbSession,
+    ctx: SandboxCtx,
+) -> dict[str, Any]:
+    """Close a case only if closure gate passes (evidence or authorized clinician override)."""
+    return close_case_with_gate(
+        db,
+        sb=ctx.sandbox,
+        actor_role=ctx.role,
+        case_id=case_id,
+        body=body,
+    )
+
