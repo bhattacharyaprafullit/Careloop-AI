@@ -139,6 +139,26 @@ input[type="checkbox"] {
   accent-color: #4f46e5;
 }
 
+/* Ensure hand cursor on all interactive elements across the app */
+button,
+[role="button"],
+a,
+select,
+summary,
+input[type="submit"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+.clickable {
+  cursor: pointer !important;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled {
+  cursor: not-allowed !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

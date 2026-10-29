@@ -58,11 +58,22 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setRoleState(getStoredRole());
-    void ensureSandboxToken();
+    void ensureSandboxToken().then((token) => {
+      if (token) {
+        void queryClient.prefetchQuery({
+          queryKey: ["priority-queue", "all", 0],
+          queryFn: () => apiFetch("/api/v1/cases/priority-queue?page_size=50"),
+        });
+        void queryClient.prefetchQuery({
+          queryKey: ["approvals", 0],
+          queryFn: () => apiFetch("/api/v1/workflow/approvals"),
+        });
+      }
+    });
     return subscribeWakingState((waking, attempt) => {
       setWakingAttempt(waking ? attempt : 0);
     });
-  }, []);
+  }, [queryClient]);
 
   const setRole = useCallback((next: Role) => {
     setStoredRole(next);
