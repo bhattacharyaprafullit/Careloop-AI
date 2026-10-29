@@ -2,7 +2,7 @@
 
 /* ---------- CareLoop design tokens ---------- */
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans",
+  --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, "Noto Sans",
     "Noto Sans Devanagari", Arial, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
 

@@ -10,7 +10,7 @@ import React, {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   apiFetch,
-  ensureSandboxToken,
+  getStoredToken,
   getStoredRole,
   setStoredRole,
   subscribeWakingState,
@@ -58,18 +58,17 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setRoleState(getStoredRole());
-    void ensureSandboxToken().then((token) => {
-      if (token) {
+    // Only prefetch in the background when the main thread is idle and a token already exists
+    const existingToken = getStoredToken();
+    if (existingToken && typeof window !== "undefined") {
+      const scheduleIdle = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 1200));
+      scheduleIdle(() => {
         void queryClient.prefetchQuery({
           queryKey: ["priority-queue", "all", 0],
           queryFn: () => apiFetch("/api/v1/cases/priority-queue?page_size=50"),
         });
-        void queryClient.prefetchQuery({
-          queryKey: ["approvals", 0],
-          queryFn: () => apiFetch("/api/v1/workflow/approvals"),
-        });
-      }
-    });
+      });
+    }
     return subscribeWakingState((waking, attempt) => {
       setWakingAttempt(waking ? attempt : 0);
     });

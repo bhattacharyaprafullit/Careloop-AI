@@ -90,8 +90,8 @@ export default function Home() {
           </h1>
 
           <p className="mt-5 max-w-2xl text-base text-slate-600 sm:text-lg leading-relaxed">
-            CareLoop AI coordinates positive cancer screenings across issuance, notification, confirmatory tests,
-            and specialist referrals — with explainable ML prioritization, grounded patient teach-back,
+            CareLoop AI coordinates actionable clinical screenings and diagnostic findings across issuance, notification,
+            confirmatory tests, and specialist referrals — with explainable ML prioritization, grounded patient teach-back,
             and safety-governed human closure.
           </p>
 

@@ -66,7 +66,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50/60 text-slate-900 antialiased selection:bg-blue-600 selection:text-white">
       {wakingAttempt > 0 && (
-        <div role="status" className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 px-4 py-2 text-center text-xs font-semibold text-white shadow-inner">
+        <div role="status" className="fixed top-0 inset-x-0 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 px-4 py-2 text-center text-xs font-semibold text-white shadow-lg backdrop-blur-md">
           <LoaderCircle className="h-3.5 w-3.5 animate-spin text-blue-300" />
           <span>Waking backend service (attempt {wakingAttempt} of 3) — warm-up in progress...</span>
         </div>
