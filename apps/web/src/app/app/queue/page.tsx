@@ -56,11 +56,11 @@ export default function QueuePage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-black tracking-tight text-slate-900">Coordinator Priority Queue</h1>
-            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-bold text-blue-800">
-              {cases.length} active
+            <span className="inline-flex h-5 min-w-16 items-center justify-center rounded-full bg-blue-100 px-2.5 text-xs font-bold text-blue-800">
+              {isLoading ? "Loading..." : `${cases.length} active`}
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500 max-w-2xl">
+          <p className="mt-1 text-xs text-slate-500 max-w-2xl leading-normal">
             Ranked by multi-factor clinical priority: urgency tier (45%), calibrated drop-off risk (35%),
             and SLA breach pressure (20%).
           </p>
@@ -115,19 +115,13 @@ export default function QueuePage() {
         })}
       </div>
 
-      {/* Table & Loading States */}
-      {isLoading ? (
-        <div className="mt-4 space-y-2.5" aria-label="Loading queue">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <div key={n} className="h-16 animate-pulse rounded-2xl bg-slate-200/70" />
-          ))}
-        </div>
-      ) : error ? (
+      {/* Table with stable container (Zero CLS & Fast LCP) */}
+      {error ? (
         <div role="alert" className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-xs font-semibold text-rose-800">
           Failed to load priority queue: {error instanceof Error ? error.message : "Unknown error"}
         </div>
       ) : (
-        <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
+        <div className="mt-4 min-h-[460px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xs">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left text-xs">
               <thead className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold uppercase tracking-wider text-slate-500">
@@ -143,10 +137,25 @@ export default function QueuePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
-                {cases.map((c) => {
-                  const remHrs = c.hours_remaining;
-                  const stateMeta = STATE_META[c.state] ?? { label: c.state, tone: "slate" as const };
-                  return (
+                {isLoading ? (
+                  [1, 2, 3, 4, 5, 6].map((n) => (
+                    <tr key={n} className="animate-pulse">
+                      <td className="px-4 py-3.5"><div className="h-4 w-28 rounded bg-slate-200/80" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-20 rounded bg-slate-100" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-24 rounded bg-slate-200/80" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-16 rounded bg-slate-100" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-20 rounded bg-slate-200/80" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-14 rounded bg-slate-100" /></td>
+                      <td className="px-4 py-3.5"><div className="h-4 w-12 rounded bg-slate-200/80" /></td>
+                      <td className="px-4 py-3.5 text-right"><div className="ml-auto h-6 w-16 rounded bg-slate-200/80" /></td>
+                    </tr>
+                  ))
+                ) : (
+                  <>
+                    {cases.map((c) => {
+                    const remHrs = c.hours_remaining;
+                    const stateMeta = STATE_META[c.state] ?? { label: c.state, tone: "slate" as const };
+                    return (
                     <tr
                       key={c.case_id}
                       data-testid={`case-row-${c.case_id}`}
@@ -247,13 +256,15 @@ export default function QueuePage() {
                   );
                 })}
 
-                {cases.length === 0 && (
+                {!isLoading && cases.length === 0 && (
                   <tr>
                     <td colSpan={8} className="px-4 py-12 text-center text-xs text-slate-400">
                       No cases match the &ldquo;{activeTab}&rdquo; filter.
                     </td>
                   </tr>
                 )}
+              </>
+            )}
               </tbody>
             </table>
           </div>
