@@ -56,8 +56,11 @@ def get_priority_queue(
     """Return filtered, priority-sorted cases for the current sandbox."""
     sb = ctx.sandbox
     clock = clock_for_sandbox(sb)
-    cases = list(db.scalars(select(Case).where(Case.sandbox_id == sb.id)))
-    patients = {p.id: p for p in db.scalars(select(Patient).where(Patient.sandbox_id == sb.id))}
+    cases_with_patient = db.execute(
+        select(Case, Patient.alias)
+        .outerjoin(Patient, (Patient.id == Case.patient_id) & (Patient.sandbox_id == sb.id))
+        .where(Case.sandbox_id == sb.id)
+    ).all()
     pending_ids = set(
         db.scalars(
             select(PendingApproval.case_id).where(
@@ -65,15 +68,18 @@ def get_priority_queue(
             )
         )
     )
+    # Only select case_id and p_dropoff instead of full ORM objects with large JSON shap/survival blobs
     risks = {
-        r.case_id: float(r.p_dropoff)
-        for r in db.scalars(
-            select(RiskScore).where(RiskScore.sandbox_id == sb.id).order_by(RiskScore.at.asc())
-        )
+        row[0]: float(row[1])
+        for row in db.execute(
+            select(RiskScore.case_id, RiskScore.p_dropoff)
+            .where(RiskScore.sandbox_id == sb.id)
+            .order_by(RiskScore.at.asc())
+        ).all()
     }
 
     items: list[PriorityQueueItem] = []
-    for c in cases:
+    for c, pat_alias in cases_with_patient:
         c_needs_app = c.id in pending_ids
         c_overdue = is_overdue(c.state, c.state_entered_at, c.urgency_tier, clock=clock)
         if (
@@ -96,11 +102,10 @@ def get_priority_queue(
         )
         due = sla_due_at(c.state, c.state_entered_at, c.urgency_tier)
         rem = hours_remaining(c.state, c.state_entered_at, c.urgency_tier, clock=clock)
-        pat = patients.get(c.patient_id)
         items.append(
             PriorityQueueItem(
                 case_id=c.id,
-                patient_alias=pat.alias if pat else c.patient_id,
+                patient_alias=pat_alias or c.patient_id,
                 screening_type=c.screening_type,
                 state=c.state,
                 owner_role=c.owner_role,

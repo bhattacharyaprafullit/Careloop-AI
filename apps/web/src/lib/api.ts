@@ -10,7 +10,7 @@ export const API_URL: string =
 
 const TOKEN_STORAGE_KEY = "careloop_sandbox_token";
 const ROLE_STORAGE_KEY = "careloop_role";
-const RETRY_DELAYS_MS = [2000, 5000, 10000] as const;
+const RETRY_DELAYS_MS = [800, 2000] as const;
 
 type WakingListener = (waking: boolean, attempt: number) => void;
 const wakingListeners = new Set<WakingListener>();
