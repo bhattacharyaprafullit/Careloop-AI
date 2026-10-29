@@ -5,7 +5,7 @@
 ---
 
 ## Overview (Requirements R1–R6)
-CareLoop AI ensures that every actionable cancer screening result (`FIT`, `MAMMOGRAPHY`, `PAP_HPV`) is communicated, confirmed, and converted into timely care with a clear owner, explicit SLA deadline, explainable ML risk scoring, and documented evidence before closure:
+CareLoop AI bridges the gap between abnormal screening results and completed care by coordinating patient notifications, confirmatory tests, specialist referrals, and follow-ups — with explainable ML prioritization, patient understanding checks, and safety-governed human oversight:
 
 - **R1 — End-to-End 11-State Lifecycle Visibility:** `RESULT_ISSUED` → `PATIENT_NOTIFIED` → `ACKNOWLEDGED` → `CONFIRMATORY_PENDING` → `REFERRAL_SENT` → `REJECTED` / `REFERRAL_ACCEPTED` → `APPOINTMENT_BOOKED` → `SEEN` → `TREATMENT_OR_SURVEILLANCE` → `CLOSED`, backed by an immutable append-only event ledger (`case_events`).
 - **R2 — Clear Ownership & SLA Clocks:** Every state assigns a responsible owner role (`coordinator` or `clinician`) and SLA hours (urgent Tier 1 halves SLA hours). Coordinators filter by `Overdue`, `Unassigned`, `Rejected`, and `Needs approval`.

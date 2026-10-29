@@ -13,7 +13,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "CareLoop AI — Closing the Screening-to-Care Loop",
   description:
-    "Decision-support demo for closed-loop screening follow-up. Synthetic data only; no diagnosis or prescribing.",
+    "CareLoop AI bridges the gap between abnormal screening results and completed care by coordinating patient notifications, confirmatory tests, specialist referrals, and follow-ups.",
 };
 
 export default function RootLayout({
