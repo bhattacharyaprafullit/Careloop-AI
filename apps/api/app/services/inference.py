@@ -1,6 +1,7 @@
 """ML inference service: load_models(model_dir) once at startup and score_case(features)."""
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +10,9 @@ from ml.train.calibrate import predict_calibrated
 from ml.train.explain import build_tree_explainer, explain_single_case
 from ml.train.features import encode_single_case
 from ml.train.train_cox import score_survival_single
+from sqlalchemy.orm import Session
+
+from app.db.models import RiskScore
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +73,29 @@ def get_loaded_models(model_dir: Path | str | None = None) -> dict[str, Any]:
     return _MODEL_CACHE
 
 
+def build_case_feature_dict(c: Any, pat: Any, days_in_stage: float = 0.1) -> dict[str, Any]:
+    """Assemble the canonical 17-feature vector from a Case and Patient ORM row."""
+    return {
+        "screening_type": c.screening_type,
+        "severity_grade": c.severity_grade,
+        "urgent_flag": 1 if c.urgency_tier == 1 else 0,
+        "finding_to_order_days": c.finding_to_order_days,
+        "prior_noshow_count": pat.prior_noshow_count,
+        "prior_noshow_ratio": pat.prior_noshow_ratio,
+        "days_since_last_encounter": pat.days_since_last_encounter,
+        "scheduling_lead_time": c.scheduling_lead_time,
+        "distance_miles": pat.distance_miles,
+        "insurance_category": pat.insurance,
+        "patient_age": pat.age,
+        "preferred_language": pat.language,
+        "digital_portal_active": 1 if pat.portal_active else 0,
+        "stage": c.state if c.state != "CLOSED" else "TREATMENT_OR_SURVEILLANCE",
+        "days_in_stage": round(days_in_stage, 2),
+        "contact_attempts": c.contact_attempts,
+        "acknowledged_flag": 1 if c.acknowledged else 0,
+    }
+
+
 def score_case(
     features: dict[str, Any], model_dir: Path | str | None = None
 ) -> dict[str, Any]:
@@ -93,3 +120,31 @@ def score_case(
         "shap": shap_drivers,
         "model_version": bundle["model_version"],
     }
+
+
+def persist_risk_score(
+    db: Session,
+    *,
+    sandbox_id: str,
+    case_id: str,
+    stage: str,
+    scored: dict[str, Any],
+    at: datetime,
+) -> RiskScore:
+    """Create and add a RiskScore ORM row from a `score_case` result dictionary."""
+    row = RiskScore(
+        sandbox_id=sandbox_id,
+        case_id=case_id,
+        stage=stage,
+        p_dropoff=float(scored["p_dropoff"]),
+        median_days=float(scored["median_days"]),
+        p_open_30=float(scored["p_open_30"]),
+        p_open_60=float(scored["p_open_60"]),
+        p_open_90=float(scored["p_open_90"]),
+        shap=scored["shap"],
+        survival_curve=scored["survival_curve"],
+        model_version=str(scored["model_version"]),
+        at=at,
+    )
+    db.add(row)
+    return row

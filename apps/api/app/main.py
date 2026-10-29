@@ -47,7 +47,7 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     logger.info("startup", extra={"demo_mode": settings.demo_mode})
     init_db()
-    load_models(settings.model_dir)
+    load_models(settings.resolved_model_dir)
     yield
     logger.info("shutdown")
 

@@ -28,9 +28,25 @@ class Settings(BaseSettings):
     groq_api_key: SecretStr | None = Field(default=None, alias="GROQ_API_KEY")
     llm_model: str = Field(default="llama-3.3-70b-versatile", alias="LLM_MODEL")
     cron_token: SecretStr | None = Field(default=None, alias="CRON_TOKEN")
-    allowed_origins: str = Field(default="http://localhost:3000", alias="ALLOWED_ORIGINS")
+    allowed_origins: str = Field(
+        default="http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
+        alias="ALLOWED_ORIGINS",
+    )
     demo_mode: bool = Field(default=True, alias="DEMO_MODE")
     model_dir: Path = Field(default=_REPO_ROOT / "ml" / "artifacts", alias="MODEL_DIR")
+
+    @property
+    def resolved_model_dir(self) -> Path:
+        """Resolve model_dir reliably whether relative to repo root, cwd, or absolute."""
+        if self.model_dir.is_absolute() and self.model_dir.exists():
+            return self.model_dir
+        from_root = (_REPO_ROOT / self.model_dir).resolve()
+        if from_root.exists():
+            return from_root
+        from_cwd = (Path.cwd() / self.model_dir).resolve()
+        if from_cwd.exists():
+            return from_cwd
+        return (_REPO_ROOT / "ml" / "artifacts").resolve()
 
     @property
     def cors_origins(self) -> list[str]:
