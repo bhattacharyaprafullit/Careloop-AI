@@ -88,13 +88,22 @@ def _forbid_orm_update_or_delete(
 
 def build_engine(database_url: str | None = None) -> Engine:
     """Create a SQLAlchemy 2.0 Engine configured for SQLite or Supabase Postgres."""
-    url = database_url or get_settings().database_url
+    url = database_url or get_settings().effective_database_url
     connect_args: dict[str, Any] = {}
     if url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
     elif "postgresql" in url:
         connect_args["prepare_threshold"] = 0
-    return create_engine(url, future=True, pool_pre_ping=True, connect_args=connect_args)
+    eng = create_engine(url, future=True, pool_pre_ping=True, connect_args=connect_args)
+    if url.startswith("sqlite") and ":memory:" not in url:
+        @event.listens_for(eng, "connect")
+        def _set_sqlite_pragma(dbapi_conn: Any, _conn_record: Any) -> None:
+            cursor = dbapi_conn.cursor()
+            cursor.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA synchronous=NORMAL;")
+            cursor.execute("PRAGMA temp_store=MEMORY;")
+            cursor.close()
+    return eng
 
 
 def get_engine() -> Engine:

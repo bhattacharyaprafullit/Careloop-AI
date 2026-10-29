@@ -57,10 +57,15 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
+_SEED_CACHE: dict[str, dict[str, Any]] = {}
+
+
 def load_seed_data(model_dir: Path | None = None) -> dict[str, Any]:
-    """Load the 60-case seed payload from ml/artifacts/seed.json."""
-    mdir = model_dir or get_settings().model_dir
-    return dict(json.loads((Path(mdir) / "seed.json").read_text(encoding="utf-8")))
+    """Load the 60-case seed payload from ml/artifacts/seed.json (cached in memory)."""
+    mdir = str((model_dir or get_settings().resolved_model_dir).resolve())
+    if mdir not in _SEED_CACHE:
+        _SEED_CACHE[mdir] = dict(json.loads((Path(mdir) / "seed.json").read_text(encoding="utf-8")))
+    return _SEED_CACHE[mdir]
 
 
 def clone_seed_into_sandbox(

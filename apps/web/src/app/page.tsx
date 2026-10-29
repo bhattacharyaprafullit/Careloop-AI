@@ -14,26 +14,19 @@ import {
   LoaderCircle,
   Network,
 } from "lucide-react";
-import { createSandboxSession } from "@/lib/api";
+import { ensureSandboxToken } from "@/lib/api";
 import { useSandbox } from "@/hooks/use-sandbox";
 
 export default function Home() {
   const router = useRouter();
-  const { setTourStep, triggerRefresh } = useSandbox();
+  const { setTourStep } = useSandbox();
   const [launching, setLaunching] = useState(false);
 
-  const handleLaunchDemo = async () => {
+  const handleLaunchDemo = () => {
     setLaunching(true);
-    try {
-      await createSandboxSession();
-      triggerRefresh();
-      setTourStep(1);
-    } catch {
-      // Fallback: even if backend is waking up, navigate to queue
-    } finally {
-      setLaunching(false);
-      router.push("/app/queue");
-    }
+    void ensureSandboxToken();
+    setTourStep(1);
+    router.push("/app/queue");
   };
 
   const featurePillars = [
@@ -100,7 +93,8 @@ export default function Home() {
               type="button"
               data-testid="launch-demo-btn"
               disabled={launching}
-              onClick={() => void handleLaunchDemo()}
+              onMouseEnter={() => void ensureSandboxToken()}
+              onClick={handleLaunchDemo}
               className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-700 active:scale-98 disabled:opacity-60"
             >
               {launching ? (

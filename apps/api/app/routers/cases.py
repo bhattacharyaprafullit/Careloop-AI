@@ -50,7 +50,7 @@ def get_priority_queue(
     needs_approval: bool | None = None,
     owner_role: str | None = None,
     page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=50)] = 25,
+    page_size: Annotated[int, Query(ge=1, le=250)] = 60,
     sort: str = "priority_desc",
 ) -> PriorityQueueResponse:
     """Return filtered, priority-sorted cases for the current sandbox."""
@@ -68,7 +68,7 @@ def get_priority_queue(
             )
         )
     )
-    # Only select case_id and p_dropoff instead of full ORM objects with large JSON shap/survival blobs
+    # Select only case_id and p_dropoff instead of full ORM objects with JSON blobs
     risks = {
         row[0]: float(row[1])
         for row in db.execute(

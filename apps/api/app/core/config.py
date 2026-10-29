@@ -33,7 +33,15 @@ class Settings(BaseSettings):
         alias="ALLOWED_ORIGINS",
     )
     demo_mode: bool = Field(default=True, alias="DEMO_MODE")
+    fast_demo_db: bool = Field(default=True, alias="FAST_DEMO_DB")
     model_dir: Path = Field(default=_REPO_ROOT / "ml" / "artifacts", alias="MODEL_DIR")
+
+    @property
+    def effective_database_url(self) -> str:
+        """Use ultra-fast local SQLite in demo mode unless FAST_DEMO_DB=false is set."""
+        if self.demo_mode and self.fast_demo_db:
+            return "sqlite:///./careloop.db"
+        return self.database_url
 
     @property
     def resolved_model_dir(self) -> Path:

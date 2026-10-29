@@ -25,7 +25,7 @@ def _sqlite_path_from_url(database_url: str) -> str:
 def get_checkpointer(database_url: str | None = None) -> Any:
     """Return a configured PostgresSaver or SqliteSaver instance (cached by URL)."""
     global _CHECKPOINTER, _CHECKPOINTER_KEY
-    url = database_url or get_settings().database_url
+    url = database_url or get_settings().effective_database_url
     if _CHECKPOINTER is not None and url == _CHECKPOINTER_KEY:
         return _CHECKPOINTER
 

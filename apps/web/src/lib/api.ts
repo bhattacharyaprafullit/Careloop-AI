@@ -70,13 +70,24 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+let inflightSandboxPromise: Promise<SandboxResponse> | null = null;
+
 export async function createSandboxSession(): Promise<SandboxResponse> {
-  const res = await apiFetch<SandboxResponse>("/api/v1/sandbox", {
+  if (inflightSandboxPromise) {
+    return inflightSandboxPromise;
+  }
+  inflightSandboxPromise = apiFetch<SandboxResponse>("/api/v1/sandbox", {
     method: "POST",
     skipSandboxHeader: true,
-  });
-  setStoredToken(res.token);
-  return res;
+  })
+    .then((res) => {
+      setStoredToken(res.token);
+      return res;
+    })
+    .finally(() => {
+      inflightSandboxPromise = null;
+    });
+  return inflightSandboxPromise;
 }
 
 export async function ensureSandboxToken(): Promise<string> {

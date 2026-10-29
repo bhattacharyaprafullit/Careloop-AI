@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Plus,
   X,
@@ -22,24 +22,31 @@ import type { PriorityQueueItem, PriorityQueueResponse } from "@/lib/types";
 type QueueTab = "all" | "overdue" | "unassigned" | "rejected" | "needs_approval";
 
 export default function QueuePage() {
+  const queryClient = useQueryClient();
   const { refreshKey, triggerRefresh } = useSandbox();
   const [activeTab, setActiveTab] = useState<QueueTab>("all");
   const [showIngest, setShowIngest] = useState(false);
 
-  const queryString = (() => {
-    if (activeTab === "overdue") return "?overdue=true&page_size=50";
-    if (activeTab === "unassigned") return "?unassigned=true&page_size=50";
-    if (activeTab === "rejected") return "?rejected=true&page_size=50";
-    if (activeTab === "needs_approval") return "?needs_approval=true&page_size=50";
-    return "?page_size=50";
-  })();
-
   const { data, isLoading, error } = useQuery<PriorityQueueResponse>({
-    queryKey: ["priority-queue", activeTab, refreshKey],
-    queryFn: () => apiFetch<PriorityQueueResponse>(`/api/v1/cases/priority-queue${queryString}`),
+    queryKey: ["priority-queue", refreshKey],
+    queryFn: () => apiFetch<PriorityQueueResponse>("/api/v1/cases/priority-queue?page_size=100"),
   });
 
-  const cases: PriorityQueueItem[] = data?.items ?? [];
+  const cases: PriorityQueueItem[] = useMemo(() => {
+    const items = data?.items ?? [];
+    if (activeTab === "overdue") return items.filter((c) => c.overdue);
+    if (activeTab === "unassigned") return items.filter((c) => !c.owner_id);
+    if (activeTab === "rejected") return items.filter((c) => c.state === "REJECTED");
+    if (activeTab === "needs_approval") return items.filter((c) => c.needs_approval);
+    return items;
+  }, [data, activeTab]);
+
+  const prefetchCase = (caseId: string) => {
+    void queryClient.prefetchQuery({
+      queryKey: ["case-details", caseId, refreshKey],
+      queryFn: () => apiFetch(`/api/v1/cases/${caseId}/details`),
+    });
+  };
 
   const tabs: { id: QueueTab; label: string }[] = [
     { id: "all", label: "All Cases" },
@@ -159,6 +166,7 @@ export default function QueuePage() {
                     <tr
                       key={c.case_id}
                       data-testid={`case-row-${c.case_id}`}
+                      onMouseEnter={() => prefetchCase(c.case_id)}
                       className="transition hover:bg-blue-50/30"
                     >
                       <td className="px-4 py-3">

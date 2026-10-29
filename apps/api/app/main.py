@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
@@ -63,6 +64,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     app.state.limiter = limiter
+    app.add_middleware(GZipMiddleware, minimum_size=500)
     app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -77,6 +79,7 @@ def create_app() -> FastAPI:
             REQUEST_ID_HEADER,
         ],
         expose_headers=[REQUEST_ID_HEADER],
+        max_age=86400,
     )
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
