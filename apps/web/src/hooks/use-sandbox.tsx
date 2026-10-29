@@ -64,7 +64,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
       scheduleIdle(() => {
         void queryClient.prefetchQuery({
           queryKey: ["priority-queue", 0],
-          queryFn: () => apiFetch("/api/v1/cases/priority-queue?page_size=100"),
+          queryFn: () => apiFetch("/api/v1/cases/priority-queue?page_size=50"),
         });
         void queryClient.prefetchQuery({
           queryKey: ["approvals", 0],

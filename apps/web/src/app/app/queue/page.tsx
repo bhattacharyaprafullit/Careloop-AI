@@ -29,7 +29,7 @@ export default function QueuePage() {
 
   const { data, isLoading, error } = useQuery<PriorityQueueResponse>({
     queryKey: ["priority-queue", refreshKey],
-    queryFn: () => apiFetch<PriorityQueueResponse>("/api/v1/cases/priority-queue?page_size=100"),
+    queryFn: () => apiFetch<PriorityQueueResponse>("/api/v1/cases/priority-queue?page_size=50"),
   });
 
   const cases: PriorityQueueItem[] = useMemo(() => {
