@@ -33,13 +33,9 @@ REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 DEFAULT_OUT_DIR: Final[Path] = REPO_ROOT / "ml" / "data" / "out"
 DEFAULT_ARTIFACTS_DIR: Final[Path] = REPO_ROOT / "ml" / "artifacts"
 
-# All generator parameters and coefficients in one dictionary (spec requirement)
 COEFFICIENTS: Final[dict[str, Any]] = {
     "n_patients": 12000,
     "censor_day": 120.0,
-    # Latent z = b0 + b1*prior_noshow_ratio + b2*log(1+distance) + b3*(MEDICAID or UNINSURED)
-    #            - b4*portal_active + b5*(lead_time>21) + b6*(severity_grade>=4)
-    #            + b7*(days_in_stage_ratio) + b8*(contact_attempts>2) - b9*acknowledged + noise
     "b0": -1.95,
     "b1_noshow_ratio": 1.65,
     "b2_log_distance": 0.24,
@@ -51,7 +47,8 @@ COEFFICIENTS: Final[dict[str, Any]] = {
     "b8_high_contacts": 0.35,
     "b9_acknowledged": 0.30,
     "noise_std": 0.92,
-    # Per-stage offset so every stage positive rate is strictly in [0.15, 0.35]
+    "time_log_scale": 0.32,
+    "time_sigma": 0.48,
     "stage_offsets": {
         "RESULT_ISSUED": -0.35,
         "PATIENT_NOTIFIED": -0.25,
@@ -64,9 +61,6 @@ COEFFICIENTS: Final[dict[str, Any]] = {
         "SEEN": -0.02,
         "TREATMENT_OR_SURVEILLANCE": 0.06,
     },
-    # Stage time lognormal parameters growing with z
-    "time_log_scale": 0.32,
-    "time_sigma": 0.48,
 }
 
 
@@ -75,8 +69,7 @@ def _sigmoid(x: np.ndarray) -> np.ndarray:
 
 
 def _sha256_df(df: pd.DataFrame) -> str:
-    raw = pd.util.hash_pandas_object(df, index=True).values.tobytes()
-    return hashlib.sha256(raw).hexdigest()
+    return hashlib.sha256(pd.util.hash_pandas_object(df, index=True).values.tobytes()).hexdigest()
 
 
 def generate_dataset(
@@ -90,114 +83,97 @@ def generate_dataset(
     out_dir.mkdir(parents=True, exist_ok=True)
     artifacts_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Patient-level features
     ages = (
-        np.clip(rng.normal(loc=52.0, scale=14.0, size=n_patients), 25.0, 90.0)
-        .round()
-        .astype(int)
+        np.clip(rng.normal(loc=52.0, scale=14.0, size=n_patients), 25.0, 90.0).round().astype(int)
     )
     langs = rng.choice(LANGUAGES, size=n_patients, p=LANGUAGE_PROBS)
-
-    ins_list: list[str] = []
-    for age in ages:
-        p_ins = (0.20, 0.65, 0.10, 0.05) if age >= 65 else (0.52, 0.08, 0.25, 0.15)
-        ins_list.append(str(rng.choice(INSURANCE_CATEGORIES, p=p_ins)))
-    insurances = np.array(ins_list)
-
-    distances = np.clip(
-        rng.lognormal(mean=2.1, sigma=0.85, size=n_patients), 0.5, 120.0
-    ).round(2)
+    insurances = np.array(
+        [
+            str(
+                rng.choice(
+                    INSURANCE_CATEGORIES,
+                    p=(0.20, 0.65, 0.10, 0.05) if age >= 65 else (0.52, 0.08, 0.25, 0.15),
+                )
+            )
+            for age in ages
+        ]
+    )
+    distances = np.clip(rng.lognormal(mean=2.1, sigma=0.85, size=n_patients), 0.5, 120.0).round(2)
     portal_prob = np.clip(0.82 - 0.0055 * (ages - 25), 0.20, 0.85)
     portal_active = (rng.random(size=n_patients) < portal_prob).astype(int)
-
     noshow_ratio = np.clip(rng.beta(a=1.4, b=5.2, size=n_patients), 0.0, 1.0).round(4)
     prior_visits = rng.integers(1, 13, size=n_patients)
     noshow_count = np.clip(np.round(noshow_ratio * prior_visits), 0, 12).astype(int)
     days_since_enc = (
-        np.clip(rng.exponential(scale=180.0, size=n_patients), 0.0, 1500.0)
-        .round()
-        .astype(int)
+        np.clip(rng.exponential(scale=180.0, size=n_patients), 0.0, 1500.0).round().astype(int)
     )
-
-    # 2. Case-level screening attributes
     screenings = rng.choice(SCREENING_TYPES, size=n_patients, p=(0.40, 0.35, 0.25))
     severity_grade = rng.choice(
         [0, 1, 2, 3, 4, 5], size=n_patients, p=(0.05, 0.18, 0.32, 0.25, 0.13, 0.07)
     )
     urgent_flag = ((severity_grade >= 4) | (rng.random(size=n_patients) < 0.08)).astype(int)
     urgency_tier = np.where(urgent_flag == 1, 1, np.where(severity_grade >= 2, 2, 3))
-    finding_to_order = np.clip(
-        rng.gamma(shape=2.0, scale=4.5, size=n_patients), 0.0, 60.0
-    ).round(1)
+    finding_to_order = np.clip(rng.gamma(shape=2.0, scale=4.5, size=n_patients), 0.0, 60.0).round(1)
     lead_time = np.clip(rng.gamma(shape=2.4, scale=7.5, size=n_patients), 1.0, 90.0).round(1)
-
     underinsured = np.isin(insurances, ["MEDICAID", "UNINSURED"]).astype(float)
-    long_lead = (lead_time > 21.0).astype(float)
-    high_sev = (severity_grade >= 4).astype(float)
-
     base_z = (
         float(COEFFICIENTS["b0"])
         + float(COEFFICIENTS["b1_noshow_ratio"]) * noshow_ratio
         + float(COEFFICIENTS["b2_log_distance"]) * np.log1p(distances)
         + float(COEFFICIENTS["b3_underinsured"]) * underinsured
         - float(COEFFICIENTS["b4_portal_active"]) * portal_active
-        + float(COEFFICIENTS["b5_long_lead_time"]) * long_lead
-        + float(COEFFICIENTS["b6_high_severity"]) * high_sev
+        + float(COEFFICIENTS["b5_long_lead_time"]) * (lead_time > 21.0).astype(float)
+        + float(COEFFICIENTS["b6_high_severity"]) * (severity_grade >= 4).astype(float)
     )
-
-    case_records: list[dict[str, Any]] = []
-    stage_records: list[dict[str, Any]] = []
-    event_records: list[dict[str, Any]] = []
-
+    case_records, stage_records, event_records = [], [], []
     stage_offsets: dict[str, float] = COEFFICIENTS["stage_offsets"]
     noise_std = float(COEFFICIENTS["noise_std"])
     time_log_scale = float(COEFFICIENTS["time_log_scale"])
-    time_sigma = float(COEFFICIENTS["time_sigma"])
-    censor_day = float(COEFFICIENTS["censor_day"])
+    time_sigma, censor_day = float(COEFFICIENTS["time_sigma"]), float(COEFFICIENTS["censor_day"])
 
     for i in range(n_patients):
-        cid = f"case-{i + 1:05d}"
-        pid = f"pat-{i + 1:05d}"
+        cid, pid = f"case-{i + 1:05d}", f"pat-{i + 1:05d}"
         u_flag = int(urgent_flag[i])
-
-        needs_confirmatory = bool(rng.random() < 0.45)
-        was_rejected = bool(rng.random() < 0.22)
-
-        planned_stages = ["RESULT_ISSUED", "PATIENT_NOTIFIED", "ACKNOWLEDGED"]
-        if needs_confirmatory:
-            planned_stages.append("CONFIRMATORY_PENDING")
-        planned_stages.append("REFERRAL_SENT")
-        if was_rejected:
-            planned_stages.append("REJECTED")
-        planned_stages.extend(
-            [
-                "REFERRAL_ACCEPTED",
-                "APPOINTMENT_BOOKED",
-                "SEEN",
-                "TREATMENT_OR_SURVEILLANCE",
-            ]
-        )
-
-        elapsed_hours = 0.0
-        final_state = "RESULT_ISSUED"
-        closed_flag = 1
-        prev_st: str | None = None
+        base_rec = {
+            "case_id": cid,
+            "patient_id": pid,
+            "screening_type": str(screenings[i]),
+            "severity_grade": int(severity_grade[i]),
+            "urgent_flag": u_flag,
+            "finding_to_order_days": float(finding_to_order[i]),
+            "prior_noshow_count": int(noshow_count[i]),
+            "prior_noshow_ratio": float(noshow_ratio[i]),
+            "days_since_last_encounter": int(days_since_enc[i]),
+            "scheduling_lead_time": float(lead_time[i]),
+            "distance_miles": float(distances[i]),
+            "insurance_category": str(insurances[i]),
+            "patient_age": int(ages[i]),
+            "preferred_language": str(langs[i]),
+            "digital_portal_active": int(portal_active[i]),
+        }
+        planned_stages = [
+            "RESULT_ISSUED",
+            "PATIENT_NOTIFIED",
+            "ACKNOWLEDGED",
+            *(["CONFIRMATORY_PENDING"] if rng.random() < 0.45 else []),
+            "REFERRAL_SENT",
+            *(["REJECTED"] if rng.random() < 0.22 else []),
+            "REFERRAL_ACCEPTED",
+            "APPOINTMENT_BOOKED",
+            "SEEN",
+            "TREATMENT_OR_SURVEILLANCE",
+        ]
+        elapsed_hours, final_state, closed_flag, prev_st = 0.0, "RESULT_ISSUED", 1, None
 
         for st in planned_stages:
             base_sla = STAGE_BASE_SLA_HOURS[st]
             sla_h = base_sla / 2.0 if u_flag == 1 else base_sla
-
             acknowledged_flag = 0 if st in {"RESULT_ISSUED", "PATIENT_NOTIFIED"} else 1
             contact_attempts = int(
-                np.clip(
-                    rng.poisson(lam=1.2 + (1.5 if base_z[i] > -0.8 else 0.3)),
-                    0,
-                    8,
-                )
+                np.clip(rng.poisson(lam=1.2 + (1.5 if base_z[i] > -0.8 else 0.3)), 0, 8)
             )
             days_in_stage = round(
-                float(np.clip(rng.exponential(scale=(sla_h / 24.0) * 0.45), 0.1, 45.0)),
-                2,
+                float(np.clip(rng.exponential(scale=(sla_h / 24.0) * 0.45), 0.1, 45.0)), 2
             )
             days_ratio = min(days_in_stage / max(sla_h / 24.0, 0.5), 2.5)
 
@@ -214,27 +190,12 @@ def generate_dataset(
 
             mean_log_h = np.log(sla_h * 0.52) + time_log_scale * (z_stage + 0.8)
             stage_hours = round(
-                float(np.clip(rng.lognormal(mean=mean_log_h, sigma=time_sigma), 1.0, 1440.0)),
-                2,
+                float(np.clip(rng.lognormal(mean=mean_log_h, sigma=time_sigma), 1.0, 1440.0)), 2
             )
 
             stage_records.append(
                 {
-                    "case_id": cid,
-                    "patient_id": pid,
-                    "screening_type": str(screenings[i]),
-                    "severity_grade": int(severity_grade[i]),
-                    "urgent_flag": u_flag,
-                    "finding_to_order_days": float(finding_to_order[i]),
-                    "prior_noshow_count": int(noshow_count[i]),
-                    "prior_noshow_ratio": float(noshow_ratio[i]),
-                    "days_since_last_encounter": int(days_since_enc[i]),
-                    "scheduling_lead_time": float(lead_time[i]),
-                    "distance_miles": float(distances[i]),
-                    "insurance_category": str(insurances[i]),
-                    "patient_age": int(ages[i]),
-                    "preferred_language": str(langs[i]),
-                    "digital_portal_active": int(portal_active[i]),
+                    **base_rec,
                     "stage": st,
                     "days_in_stage": days_in_stage,
                     "contact_attempts": contact_attempts,
@@ -243,7 +204,6 @@ def generate_dataset(
                     "stage_hours": stage_hours,
                 }
             )
-
             event_records.append(
                 {
                     "case_id": cid,
@@ -263,33 +223,18 @@ def generate_dataset(
 
         total_days = elapsed_hours / 24.0
         if total_days > censor_day:
-            closed_flag = 0
-            days_to_close = censor_day
+            closed_flag, days_to_close = 0, censor_day
         elif closed_flag == 1:
-            final_state = "CLOSED"
-            days_to_close = round(max(1.0, total_days), 2)
+            final_state, days_to_close = "CLOSED", round(max(1.0, total_days), 2)
         else:
-            extra_days = rng.uniform(10.0, 45.0)
-            days_to_close = round(min(censor_day, max(1.0, total_days + extra_days)), 2)
+            days_to_close = round(
+                min(censor_day, max(1.0, total_days + rng.uniform(10.0, 45.0))), 2
+            )
 
         case_records.append(
             {
-                "case_id": cid,
-                "patient_id": pid,
-                "patient_age": int(ages[i]),
-                "preferred_language": str(langs[i]),
-                "insurance_category": str(insurances[i]),
-                "distance_miles": float(distances[i]),
-                "digital_portal_active": int(portal_active[i]),
-                "prior_noshow_count": int(noshow_count[i]),
-                "prior_noshow_ratio": float(noshow_ratio[i]),
-                "days_since_last_encounter": int(days_since_enc[i]),
-                "screening_type": str(screenings[i]),
-                "severity_grade": int(severity_grade[i]),
-                "urgent_flag": u_flag,
+                **base_rec,
                 "urgency_tier": int(urgency_tier[i]),
-                "finding_to_order_days": float(finding_to_order[i]),
-                "scheduling_lead_time": float(lead_time[i]),
                 "final_state": final_state,
                 "closed_flag": int(closed_flag),
                 "days_to_close_or_censor": float(days_to_close),
@@ -306,29 +251,18 @@ def generate_dataset(
 
     stage_rates: dict[str, float] = {}
     for st in STAGE_SEQUENCE:
-        sub = stage_df[stage_df["stage"] == st]
-        rate = float(sub["dropoff"].mean())
+        rate = float(stage_df[stage_df["stage"] == st]["dropoff"].mean())
         stage_rates[st] = round(rate, 4)
         if not (0.15 <= rate <= 0.35):
             raise ValueError(f"Stage {st} positive rate {rate:.4f} outside [0.15, 0.35]")
 
-    cases_path = out_dir / "cases.parquet"
-    stage_path = out_dir / "stage_rows.parquet"
-    events_path = out_dir / "events.parquet"
-    cases_df.to_parquet(cases_path, index=False)
-    stage_df.to_parquet(stage_path, index=False)
-    events_df.to_parquet(events_path, index=False)
+    cases_df.to_parquet(out_dir / "cases.parquet", index=False)
+    stage_df.to_parquet(out_dir / "stage_rows.parquet", index=False)
+    events_df.to_parquet(out_dir / "events.parquet", index=False)
 
     seed_payload = build_seed_cases()
     seed_path = artifacts_dir / "seed.json"
     seed_path.write_text(json.dumps(seed_payload, indent=2, sort_keys=True), encoding="utf-8")
-
-    hashes = {
-        "cases_sha256": _sha256_df(cases_df),
-        "stage_rows_sha256": _sha256_df(stage_df),
-        "events_sha256": _sha256_df(events_df),
-        "seed_json_sha256": hashlib.sha256(seed_path.read_bytes()).hexdigest(),
-    }
 
     summary = {
         "seed": seed,
@@ -339,20 +273,21 @@ def generate_dataset(
         "stage_positive_rates": stage_rates,
         "overall_positive_rate": round(float(stage_df["dropoff"].mean()), 4),
         "closed_rate": round(float(cases_df["closed_flag"].mean()), 4),
-        "hashes": hashes,
+        "hashes": {
+            "cases_sha256": _sha256_df(cases_df),
+            "stage_rows_sha256": _sha256_df(stage_df),
+            "events_sha256": _sha256_df(events_df),
+            "seed_json_sha256": hashlib.sha256(seed_path.read_bytes()).hexdigest(),
+        },
     }
     logger.info("generated synthetic dataset", extra=summary)
     return summary
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate CareLoop AI synthetic dataset.")
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--n-patients", type=int, default=int(COEFFICIENTS["n_patients"]))
-    args = parser.parse_args()
+if __name__ == "__main__":
+    p = argparse.ArgumentParser(description="Generate CareLoop AI synthetic dataset.")
+    p.add_argument("--seed", type=int, default=42)
+    p.add_argument("--n-patients", type=int, default=int(COEFFICIENTS["n_patients"]))
+    args = p.parse_args()
     logging.basicConfig(level=logging.INFO)
     generate_dataset(seed=args.seed, n_patients=args.n_patients)
-
-
-if __name__ == "__main__":
-    main()

@@ -1,12 +1,45 @@
-# Placeholder: real schedules (/healthz every 10 min, /healthz/db daily, /internal/tick every 15 min)
-# are added in M11 once the backend URL exists. Manual trigger only for now.
-name: keepalive
+name: Keepalive & Scheduled SLA Tick
 
 on:
+  schedule:
+    # Runs every 10 minutes for /healthz keep-alive and /internal/tick SLA sweep
+    - cron: "*/10 * * * *"
+    # Runs once daily at 03:15 UTC for Supabase /healthz/db keep-alive
+    - cron: "15 3 * * *"
   workflow_dispatch:
 
 jobs:
-  ping:
+  keepalive-and-tick:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "keepalive is configured in M11"
+      - name: Ping backend /healthz (every 10 min)
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          if [ -z "$API_BASE_URL" ]; then
+            echo "API_BASE_URL secret not configured; skipping."
+            exit 0
+          fi
+          curl -fsS --max-time 20 "$API_BASE_URL/healthz"
+
+      - name: Ping database /healthz/db (daily keep-alive)
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+        run: |
+          if [ -z "$API_BASE_URL" ]; then
+            exit 0
+          fi
+          curl -fsS --max-time 20 "$API_BASE_URL/healthz/db"
+
+      - name: Trigger /api/v1/internal/tick SLA & sandbox sweep
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
+        run: |
+          if [ -z "$API_BASE_URL" ] || [ -z "$CRON_TOKEN" ]; then
+            echo "API_BASE_URL or CRON_TOKEN not configured; skipping tick."
+            exit 0
+          fi
+          curl -fsS --max-time 30 -X POST \
+            -H "X-Cron-Token: $CRON_TOKEN" \
+            "$API_BASE_URL/api/v1/internal/tick"

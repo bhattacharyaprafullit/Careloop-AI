@@ -186,12 +186,43 @@
             "positive_rate": 0.2693
           }
         }
+      },
+      "screening_type": {
+        "fnr_gap": 0.043,
+        "fpr_gap": 0.0141,
+        "slices": {
+          "FIT": {
+            "fnr": 0.65,
+            "fpr": 0.1675,
+            "n": 7297,
+            "positive_rate": 0.2709
+          },
+          "MAMMOGRAPHY": {
+            "fnr": 0.693,
+            "fpr": 0.1534,
+            "n": 6408,
+            "positive_rate": 0.2612
+          },
+          "PAP_HPV": {
+            "fnr": 0.6675,
+            "fpr": 0.1595,
+            "n": 4521,
+            "positive_rate": 0.2581
+          }
+        }
       }
     },
     "largest_fnr_gap": 0.3542,
     "largest_fpr_gap": 0.2641,
     "largest_gap_dimension": "distance_band",
     "threshold": 0.35
+  },
+  "llm_faithfulness": {
+    "evaluated_cases": 200,
+    "fallback_rate": 0.0,
+    "mean_ads": 0.0,
+    "total_generations": 600,
+    "validator_pass_rate": 1.0
   },
   "model_version": "1.0.0",
   "shap": {
@@ -299,7 +330,19 @@
         "units": "log-odds"
       }
     ],
+    "stability": {
+      "bootstrap_runs": 20,
+      "mean_spearman_rho": 0.9964,
+      "min_spearman_rho": 0.9926,
+      "top3_overlap_rate": 1.0
+    },
     "units": "log-odds"
+  },
+  "shap_stability": {
+    "bootstrap_runs": 20,
+    "mean_spearman_rho": 0.9964,
+    "min_spearman_rho": 0.9926,
+    "top3_overlap_rate": 1.0
   },
   "simulation": {
     "careloop": {

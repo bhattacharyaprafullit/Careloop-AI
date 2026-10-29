@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DemoBanner } from "@/components/demo-banner";
+import { AppProviders } from "@/hooks/use-sandbox";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="min-h-screen antialiased">
         <DemoBanner />
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );
