@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { DemoBanner } from "@/components/demo-banner";
 import { AppProviders } from "@/hooks/use-sandbox";
+import { ThemeProvider } from "@/hooks/use-theme";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,8 +25,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className={`${inter.className} min-h-screen antialiased`}>
-        <DemoBanner />
-        <AppProviders>{children}</AppProviders>
+        <ThemeProvider>
+          <DemoBanner />
+          <AppProviders>{children}</AppProviders>
+        </ThemeProvider>
       </body>
     </html>
   );

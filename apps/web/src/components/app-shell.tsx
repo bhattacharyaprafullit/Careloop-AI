@@ -17,6 +17,7 @@ import {
   LoaderCircle,
 } from "lucide-react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useSandbox } from "@/hooks/use-sandbox";
 import { GUIDED_TOUR_STEPS } from "@/lib/tour";
 import type { Role } from "@/lib/types";
@@ -171,6 +172,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">Guided Tour</span>
               <span className="rounded-full bg-blue-500/80 px-1.5 py-0.2 text-[10px] font-bold">8</span>
             </button>
+
+            <ThemeToggle />
           </div>
         </div>
 

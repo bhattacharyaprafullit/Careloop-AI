@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { ensureSandboxToken } from "@/lib/api";
 import { useSandbox } from "@/hooks/use-sandbox";
+import { HowItWorks } from "@/components/how-it-works";
+import { PatientSafetySection } from "@/components/patient-safety-section";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const router = useRouter();
@@ -77,14 +80,38 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-50/50 pb-16">
+    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-slate-50/50 pb-16 dark:bg-slate-950/60">
       {/* Background ambient lighting */}
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-dots opacity-40" />
-      <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute top-60 -left-20 h-96 w-96 rounded-full bg-indigo-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-dots opacity-40 dark:opacity-20" />
+      <div className="pointer-events-none absolute -top-40 right-0 h-96 w-96 rounded-full bg-blue-400/10 blur-3xl animate-pulse" />
+      <div className="pointer-events-none absolute top-60 -left-20 h-96 w-96 rounded-full bg-indigo-400/10 blur-3xl animate-blob" />
+
+      {/* Top Navbar */}
+      <header className="relative mx-auto flex max-w-6xl items-center justify-between px-4 pt-6 sm:px-6">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-sky-500 text-white shadow-sm shadow-blue-500/25 group-hover:scale-105 transition-transform duration-200">
+            <Activity className="h-5 w-5" />
+          </span>
+          <div className="flex flex-col">
+            <span className="text-base font-extrabold tracking-tight text-slate-900 dark:text-white">CareLoop AI</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 -mt-1 dark:text-slate-400">Closed-Loop Care</span>
+          </div>
+        </Link>
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={handleLaunchDemo}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-blue-700 active:scale-95"
+          >
+            <span>Launch App</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </header>
 
       {/* Hero Section */}
-      <section className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14">
+      <section className="relative mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
         <div className="flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-blue-800 shadow-2xs backdrop-blur-xs">
             <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
@@ -145,6 +172,12 @@ export default function Home() {
             </Link>
           </div>
         </div>
+
+        {/* 4-Stage How It Works Walkthrough */}
+        <HowItWorks />
+
+        {/* Patient Data Safety & Governance Safeguards */}
+        <PatientSafetySection />
 
         {/* Feature Pillars Grid */}
         <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -230,9 +263,9 @@ export default function Home() {
 │  • Strict Evidence Closure Gate: Requires proof or clinician override  │
 └────────────────────────────────────────────────────────────────────────┘
         │
-        ├──► [Calibrated XGBoost (Brier <0.18) + TreeSHAP + Cox PH S(t)]
-        ├──► [Grounded LLM + Regex Fact Validator + ADS Divergence Audit]
-        └──► [LangGraph State Machine with Checkpointed interrupt() Gate]
+        ├──► [Explainable Risk Engine • Calibrated Drop-Off Scoring & Survival S(t)]
+        ├──► [Faithful Clinical Assistant • Grounded Summaries & SBAR Hand-Offs]
+        └──► [Human-in-the-Loop Orchestration • State-Preserving Clinical Gates]
                    │
                    ├── Coordinator Queue & SLA Countdown (R1, R2)
                    ├── Multilingual Patient Portal & Teach-Back (R3)

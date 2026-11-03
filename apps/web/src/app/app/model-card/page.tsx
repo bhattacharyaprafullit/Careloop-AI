@@ -79,7 +79,7 @@ export default function ModelCardPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <BrainCircuit className="h-4 w-4 text-blue-600" />
               <h2 className="text-sm font-bold text-slate-900">
-                1. Stage Drop-Off Classifier (XGBoost + Platt Calibration)
+                1. Stage Drop-Off Risk Classifier (Calibrated Tree Ensemble)
               </h2>
             </div>
 
@@ -122,7 +122,7 @@ export default function ModelCardPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
               <Activity className="h-4 w-4 text-indigo-600" />
               <h2 className="text-sm font-bold text-slate-900">
-                2. Time-to-Closure Survival ({data.survival.model_type})
+                2. Time-to-Closure Survival Engine ({data.survival.model_type})
               </h2>
             </div>
 

@@ -245,8 +245,8 @@ export default function CaseDetailPage({ params }: { params: Promise<{ id: strin
             <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700 border border-blue-200/60">
               ADS: {details.summary.ads.toFixed(2)}
             </span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-              {details.summary.source === "template" ? "Deterministic Template" : "Validated LLM"}
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              {details.summary.source === "template" ? "Clinical Protocol" : "Verified Clinical AI"}
             </span>
           </div>
           <button

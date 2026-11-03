@@ -28,12 +28,12 @@ export function LifecycleStepper({
               <div
                 key={st}
                 data-testid={`stepper-state-${st}`}
-                className={`flex min-h-[58px] flex-col items-center justify-center rounded-xl border px-1.5 py-2 text-center transition-all ${
+                className={`flex min-h-[58px] flex-col items-center justify-center rounded-xl border px-1.5 py-2 text-center transition-all duration-300 ${
                   isCurrent
-                    ? "border-blue-600 bg-blue-600 text-white shadow-xs ring-2 ring-blue-400/40"
+                    ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-400/60 scale-[1.03] dark:bg-blue-600 dark:border-blue-500"
                     : visited
-                    ? "border-emerald-300 bg-emerald-50 text-emerald-900"
-                    : "border-slate-200 bg-slate-50/60 text-slate-600"
+                    ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    : "border-slate-200 bg-slate-50/60 text-slate-500 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-500"
                 }`}
               >
                 <div className="flex items-center gap-1 text-[10px] font-bold">
