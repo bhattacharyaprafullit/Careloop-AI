@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  BrainCircuit,
   ArrowRight,
   ShieldCheck,
   Activity,
@@ -12,6 +11,9 @@ import {
   Users,
   Sparkles,
   LoaderCircle,
+  Clock,
+  MessageSquare,
+  BarChart3,
   Network,
 } from "lucide-react";
 import { ensureSandboxToken } from "@/lib/api";
@@ -32,31 +34,45 @@ export default function Home() {
   const featurePillars = [
     {
       icon: Activity,
-      title: "11-State Clinical Machine",
-      desc: "Deterministic transitions with owner & SLA tracking at every step. Urgent cases automatically halve SLA hours.",
-      tag: "R1 & R2 Visibility",
+      title: "11-State Case Visibility",
+      desc: "Deterministic lifecycle tracking from result issuance through patient acknowledgement, referral, and documented closure with append-only ledger.",
+      tag: "R1 Visibility",
       color: "from-blue-500/10 to-indigo-500/10 text-blue-600 border-blue-200",
     },
     {
-      icon: BrainCircuit,
-      title: "Calibrated Risk & TreeSHAP",
-      desc: "XGBoost drop-off probabilities with feature-attribution waterfalls and patient survival curves vs. cohort Kaplan-Meier.",
-      tag: "Explainable ML",
+      icon: Clock,
+      title: "Ownership & SLA Progression",
+      desc: "Strict coordinator and clinician assignment at every step. Tiered SLAs (72h vs 14d) with real-time countdowns and overdue breach detection.",
+      tag: "R2 Ownership & SLA",
       color: "from-purple-500/10 to-pink-500/10 text-purple-600 border-purple-200",
     },
     {
       icon: Users,
-      title: "Multilingual Teach-Back",
-      desc: "Culturally appropriate patient communications in English, Hindi, and Spanish with interactive comprehension verification.",
+      title: "Multilingual Patient Teach-Back",
+      desc: "Culturally appropriate patient communications in English, Hindi, and Spanish with interactive comprehension verification and auto-escalation.",
       tag: "R3 Patient-Centered",
       color: "from-emerald-500/10 to-teal-500/10 text-emerald-600 border-emerald-200",
     },
     {
+      icon: MessageSquare,
+      title: "Cross-Provider Consults & SBAR",
+      desc: "Timely patient-to-clinician and clinician-to-clinician consult threads with structured LLM-generated SBAR notes and referral loops.",
+      tag: "R4 Coordination",
+      color: "from-cyan-500/10 to-blue-500/10 text-cyan-600 border-cyan-200",
+    },
+    {
       icon: ShieldCheck,
-      title: "Human-in-the-Loop Gate",
-      desc: "LangGraph checkpointed interrupt() stops automated routing on high-risk, rejected, or overdue cases for clinician sign-off.",
+      title: "Human-in-the-Loop & Closure Gate",
+      desc: "LangGraph checkpointed approvals for high-risk cases and strict diagnostic closure enforcement requiring verified clinical evidence.",
       tag: "R5 Governance",
       color: "from-amber-500/10 to-orange-500/10 text-amber-600 border-amber-200",
+    },
+    {
+      icon: BarChart3,
+      title: "Impact Metrics & Simulation",
+      desc: "100-run stochastic queue simulation proving a 14-day median resolution reduction over traditional FIFO, plus full turnaround KPIs.",
+      tag: "R6 Impact & Closure",
+      color: "from-violet-500/10 to-purple-500/10 text-violet-600 border-violet-200",
     },
   ];
 
@@ -131,7 +147,7 @@ export default function Home() {
         </div>
 
         {/* Feature Pillars Grid */}
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {featurePillars.map((p) => {
             const Icon = p.icon;
             return (
