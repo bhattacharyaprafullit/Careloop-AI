@@ -17,7 +17,7 @@ const ALL_STATES = [
 test("e2e_case_page_shows_all_states", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
-  await expect(page.getByText("Demo only, synthetic data")).toBeVisible();
+  await expect(page.getByText("Synthetic Clinical Data")).toBeVisible();
 
   await page.getByTestId("launch-demo-btn").click();
   await expect(page).toHaveURL(/\/app\/queue/);
@@ -40,7 +40,7 @@ test("demo-path end-to-end closed loop journey across 1280px and 375px", async (
   // 1. Desktop 1280px: Launch live demo from landing page
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/");
-  await expect(page.getByText("Demo only, synthetic data")).toBeVisible();
+  await expect(page.getByText("Synthetic Clinical Data")).toBeVisible();
   await page.getByTestId("launch-demo-btn").click();
   await expect(page).toHaveURL(/\/app\/queue/);
 
