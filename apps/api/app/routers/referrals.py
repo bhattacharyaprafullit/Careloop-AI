@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, status
 from sqlalchemy import select
 
+from app.core.cache import invalidate_sandbox_cache
 from app.db.models import Case, Patient, Referral
 from app.deps import DbSession, SandboxCtx
 from app.schemas.patient import (
@@ -73,13 +74,15 @@ def post_referral(
     ctx: SandboxCtx,
 ) -> CreateReferralResponse:
     """Create a referral with a validated SBAR note and advance case to REFERRAL_SENT."""
-    return create_referral_with_sbar(
+    res = create_referral_with_sbar(
         db,
         sb=ctx.sandbox,
         actor_role=ctx.role,
         case_id=body.case_id,
         to_org=body.to_org,
     )
+    invalidate_sandbox_cache(ctx.sandbox.id)
+    return res
 
 
 @router.post("/referrals/{referral_id}/decision")
@@ -90,7 +93,7 @@ def post_referral_decision(
     ctx: SandboxCtx,
 ) -> dict[str, Any]:
     """Accept or reject a referral (rejection requires reason_code and re-queues to coordinator)."""
-    return decide_referral(
+    res = decide_referral(
         db,
         sb=ctx.sandbox,
         actor_role=ctx.role,
@@ -98,3 +101,5 @@ def post_referral_decision(
         decision=body.decision,
         reason_code=body.reason_code,
     )
+    invalidate_sandbox_cache(ctx.sandbox.id)
+    return res

@@ -14,6 +14,11 @@ from typing import Any
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
+from app.core.cache import (
+    get_cached_token_sandbox_id,
+    invalidate_sandbox_cache,
+    set_cached_token_sandbox_id,
+)
 from app.core.clock import ClockFn, make_clock, utc_now
 from app.core.config import get_settings
 from app.db.models import (
@@ -236,6 +241,7 @@ def create_sandbox_with_seed(
 
 def purge_sandbox_data(db: Session, sandbox_id: str) -> None:
     """Delete a sandbox and all its child rows (deletes Sandbox first to satisfy triggers)."""
+    invalidate_sandbox_cache(sandbox_id)
     db.execute(delete(Sandbox).where(Sandbox.id == sandbox_id))
     child_models = (
         CaseEvent, Closure, LLMOutput, Evidence, RiskScore, Referral,
@@ -247,8 +253,16 @@ def purge_sandbox_data(db: Session, sandbox_id: str) -> None:
 
 
 def get_sandbox_by_token(db: Session, token: str) -> Sandbox | None:
-    """Look up an active (non-expired) sandbox by its plain token."""
-    sb = db.scalar(select(Sandbox).where(Sandbox.token_hash == hash_token(token)))
+    """Look up an active (non-expired) sandbox by its plain token (cached)."""
+    t_hash = hash_token(token)
+    cached_id = get_cached_token_sandbox_id(t_hash)
+    sb: Sandbox | None = None
+    if cached_id:
+        sb = db.get(Sandbox, cached_id)
+    if sb is None:
+        sb = db.scalar(select(Sandbox).where(Sandbox.token_hash == t_hash))
+        if sb is not None:
+            set_cached_token_sandbox_id(t_hash, sb.id)
     if sb is None:
         return None
     exp = sb.expires_at if sb.expires_at.tzinfo else sb.expires_at.replace(tzinfo=UTC)

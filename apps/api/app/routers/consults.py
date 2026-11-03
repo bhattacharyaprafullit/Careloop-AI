@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter, status
 from sqlalchemy import select
 
+from app.core.cache import invalidate_sandbox_cache
 from app.db.models import Case, Consult, Patient
 from app.deps import DbSession, SandboxCtx
 from app.schemas.patient import CreateConsultRequest, ReplyConsultRequest
@@ -61,7 +62,7 @@ def post_consult(
     ctx: SandboxCtx,
 ) -> dict[str, Any]:
     """Create a patient_to_clinician or clinician_to_clinician consult thread."""
-    return create_consult_thread(
+    res = create_consult_thread(
         db,
         sb=ctx.sandbox,
         actor_role=ctx.role,
@@ -69,6 +70,8 @@ def post_consult(
         kind=body.kind,
         message=body.message,
     )
+    invalidate_sandbox_cache(ctx.sandbox.id)
+    return res
 
 
 @router.post("/consults/{consult_id}/reply")
@@ -79,10 +82,12 @@ def post_consult_reply(
     ctx: SandboxCtx,
 ) -> dict[str, Any]:
     """Reply to a consult thread and mark it answered."""
-    return reply_to_consult(
+    res = reply_to_consult(
         db,
         sb=ctx.sandbox,
         actor_role=ctx.role,
         consult_id=consult_id,
         message=body.message,
     )
+    invalidate_sandbox_cache(ctx.sandbox.id)
+    return res

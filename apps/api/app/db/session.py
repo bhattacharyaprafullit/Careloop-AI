@@ -90,11 +90,17 @@ def build_engine(database_url: str | None = None) -> Engine:
     """Create a SQLAlchemy 2.0 Engine configured for SQLite or Supabase Postgres."""
     url = database_url or get_settings().effective_database_url
     connect_args: dict[str, Any] = {}
+    engine_kwargs: dict[str, Any] = {"future": True, "pool_pre_ping": True}
     if url.startswith("sqlite"):
         connect_args["check_same_thread"] = False
     elif "postgresql" in url:
         connect_args["prepare_threshold"] = 0
-    eng = create_engine(url, future=True, pool_pre_ping=True, connect_args=connect_args)
+        connect_args["connect_timeout"] = 15
+        engine_kwargs["pool_size"] = 10
+        engine_kwargs["max_overflow"] = 20
+        engine_kwargs["pool_recycle"] = 300
+        engine_kwargs["pool_timeout"] = 25
+    eng = create_engine(url, connect_args=connect_args, **engine_kwargs)
     if url.startswith("sqlite") and ":memory:" not in url:
         @event.listens_for(eng, "connect")
         def _set_sqlite_pragma(dbapi_conn: Any, _conn_record: Any) -> None:

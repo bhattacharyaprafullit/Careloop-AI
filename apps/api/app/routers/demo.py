@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.cache import invalidate_sandbox_cache
 from app.db.models import Case, CaseEvent, PendingApproval, Sandbox
 from app.db.repo import clock_for_sandbox
 from app.deps import DbSession, SandboxCtx
@@ -105,6 +106,7 @@ def post_advance_time(
 
     overdue_n, breached_n, _ = scan_and_record_sla_breaches(db, sb)
     db.commit()
+    invalidate_sandbox_cache(sb.id)
     return AdvanceTimeResponse(
         clock_offset_hours=round(float(sb.clock_offset_hours), 2),
         overdue_cases=overdue_n,
@@ -120,6 +122,7 @@ def post_demo_reset(
     """Reset the sandbox back to its initial 60 seed cases and zero clock offset."""
     sb = ctx.sandbox
     count = reset_sandbox(db, sb)
+    invalidate_sandbox_cache(sb.id)
     return DemoResetResponse(
         sandbox_id=sb.id,
         clock_offset_hours=0.0,

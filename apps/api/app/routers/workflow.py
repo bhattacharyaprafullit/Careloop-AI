@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from app.core.cache import invalidate_sandbox_cache
 from app.core.errors import AppError
 from app.db.models import Case, Patient, PendingApproval
 from app.db.repo import clock_for_sandbox
@@ -125,6 +126,7 @@ def resume_workflow(
         at=now,
     )
     db.commit()
+    invalidate_sandbox_cache(sb.id)
 
     res = resume_case_graph(c.id, decision_payload)
     db.expire_all()

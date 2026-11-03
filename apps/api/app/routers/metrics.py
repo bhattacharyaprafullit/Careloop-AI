@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from ml.eval.simulate_queue import run_queue_simulation
 from sqlalchemy import select
 
+from app.core.cache import get_cached, set_cached
 from app.db.models import Case, CaseEvent, Closure, DelayReason, Message, Referral
 from app.db.repo import clock_for_sandbox
 from app.deps import DbSession, SandboxCtx
@@ -38,6 +39,10 @@ def get_metrics_summary(
 ) -> MetricsSummaryResponse:
     """Compute R6 closure and impact metrics from events plus the FIFO vs CareLoop simulation."""
     sb = ctx.sandbox
+    cached = get_cached(sb.id, "metrics_summary")
+    if isinstance(cached, MetricsSummaryResponse):
+        return cached
+
     clock = clock_for_sandbox(sb)
 
     cases = [
@@ -86,7 +91,9 @@ def get_metrics_summary(
         simulation=_get_simulation_summary(),
         clock=clock,
     )
-    return MetricsSummaryResponse(**summary)
+    res = MetricsSummaryResponse(**summary)
+    set_cached(sb.id, "metrics_summary", res)
+    return res
 
 
 @router.get("/metrics/model-card")

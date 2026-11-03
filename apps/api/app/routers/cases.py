@@ -8,6 +8,7 @@ from fastapi import APIRouter, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
+from app.core.cache import get_cached, invalidate_sandbox_cache, set_cached
 from app.core.errors import AppError
 from app.db.models import (
     Case,
@@ -55,6 +56,14 @@ def get_priority_queue(
 ) -> PriorityQueueResponse:
     """Return filtered, priority-sorted cases for the current sandbox."""
     sb = ctx.sandbox
+    cache_key = (
+        f"pq:{state}:{overdue}:{unassigned}:{rejected}:{needs_approval}:"
+        f"{owner_role}:{page}:{page_size}:{sort}"
+    )
+    cached = get_cached(sb.id, cache_key)
+    if isinstance(cached, PriorityQueueResponse):
+        return cached
+
     clock = clock_for_sandbox(sb)
     cases_with_patient = db.execute(
         select(Case, Patient.alias)
@@ -126,22 +135,31 @@ def get_priority_queue(
         reverse=(sort != "priority_asc"),
     )
     start = (page - 1) * page_size
-    return PriorityQueueResponse(
+    res = PriorityQueueResponse(
         items=items[start : start + page_size], page=page, page_size=page_size, total=len(items)
     )
+    set_cached(sb.id, cache_key, res)
+    return res
 
 
 @router.get("/cases/{case_id}/details", response_model=CaseDetailsResponse)
 def get_case_details(case_id: str, db: DbSession, ctx: SandboxCtx) -> CaseDetailsResponse:
     """Return full case details, timeline, risk, SHAP, survival vs KM curves, and threads."""
     sb = ctx.sandbox
+    cache_key = f"case_details:{case_id}"
+    cached = get_cached(sb.id, cache_key)
+    if isinstance(cached, CaseDetailsResponse):
+        return cached
+
     c = db.scalar(select(Case).where(Case.id == case_id, Case.sandbox_id == sb.id))
     if c is None:
         raise AppError(404, "case_not_found", f"Case '{case_id}' not found in sandbox.")
     pat = db.scalar(select(Patient).where(Patient.id == c.patient_id))
     if pat is None:
         raise AppError(404, "patient_not_found", "Patient record not found.")
-    return build_case_details_response(db, sb, c, pat)
+    res = build_case_details_response(db, sb, c, pat)
+    set_cached(sb.id, cache_key, res)
+    return res
 
 
 @router.post("/cases/{case_id}/assign")
@@ -170,6 +188,7 @@ def assign_case_owner(
         at=clock_for_sandbox(sb)(),
     )
     db.commit()
+    invalidate_sandbox_cache(sb.id)
     return {"case_id": c.id, "owner_role": c.owner_role, "owner_id": c.owner_id}
 
 
@@ -245,6 +264,7 @@ def advance_case_state(
     if esc:
         c.escalated = True
     db.commit()
+    invalidate_sandbox_cache(sb.id)
     return {
         "case_id": c.id,
         "from_state": prev_state,
@@ -289,6 +309,8 @@ def close_case(
     case_id: str, body: CloseCaseRequest, db: DbSession, ctx: SandboxCtx
 ) -> dict[str, Any]:
     """Close a case only if closure gate passes (evidence or authorized clinician override)."""
-    return close_case_with_gate(
+    res = close_case_with_gate(
         db, sb=ctx.sandbox, actor_role=ctx.role, case_id=case_id, body=body
     )
+    invalidate_sandbox_cache(ctx.sandbox.id)
+    return res

@@ -6,6 +6,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.cache import invalidate_sandbox_cache
 from app.core.errors import AppError
 from app.db.models import Case, Evidence, Message, Patient, PendingApproval, Sandbox
 from app.db.repo import clock_for_sandbox, hash_token
@@ -184,6 +185,7 @@ def acknowledge_patient_result(db: Session, token: str) -> dict[str, Any]:
         at=now,
     )
     db.commit()
+    invalidate_sandbox_cache(sb.id)
     return {"case_id": c.id, "acknowledged": True, "state": c.state}
 
 
@@ -262,6 +264,7 @@ def submit_patient_teachback(
             existing_pa.reasons = [*existing_pa.reasons, "teachback_confused"]
 
     db.commit()
+    invalidate_sandbox_cache(sb.id)
     return TeachBackResponse(
         label=label,
         followup_text=followup,

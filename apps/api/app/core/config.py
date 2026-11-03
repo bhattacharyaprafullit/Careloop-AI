@@ -33,12 +33,15 @@ class Settings(BaseSettings):
         alias="ALLOWED_ORIGINS",
     )
     demo_mode: bool = Field(default=True, alias="DEMO_MODE")
-    fast_demo_db: bool = Field(default=True, alias="FAST_DEMO_DB")
+    fast_demo_db: bool = Field(default=False, alias="FAST_DEMO_DB")
     model_dir: Path = Field(default=_REPO_ROOT / "ml" / "artifacts", alias="MODEL_DIR")
 
     @property
     def effective_database_url(self) -> str:
-        """Use ultra-fast local SQLite in demo mode unless FAST_DEMO_DB=false is set."""
+        """Use DATABASE_URL (e.g. Supabase Postgres) whenever configured.
+        Falls back to local SQLite only when explicitly requested via FAST_DEMO_DB=true."""
+        if self.database_url and not self.database_url.startswith("sqlite"):
+            return self.database_url
         if self.demo_mode and self.fast_demo_db:
             return "sqlite:///./careloop.db"
         return self.database_url
