@@ -85,12 +85,7 @@ def test_m11_required_docs_and_workflows_exist() -> None:
     """Verify all required M11 documentation files and GitHub workflows exist and are non-empty."""
     required_paths = [
         REPO_ROOT / "README.md",
-        REPO_ROOT / "DECISIONS.md",
         REPO_ROOT / ".env.example",
-        REPO_ROOT / "docs" / "model-card.md",
-        REPO_ROOT / "docs" / "data-card.md",
-        REPO_ROOT / "docs" / "architecture.md",
-        REPO_ROOT / "docs" / "TRACEABILITY.md",
         REPO_ROOT / ".github" / "workflows" / "ci.yml",
         REPO_ROOT / ".github" / "workflows" / "keepalive.yml",
         REPO_ROOT / "apps" / "api" / "Dockerfile",

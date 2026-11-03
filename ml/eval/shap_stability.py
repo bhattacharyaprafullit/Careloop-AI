@@ -8,7 +8,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR
+from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR, generate_dataset
 from ml.data.schema import FEATURE_COLUMNS
 from ml.train.explain import build_tree_explainer
 from ml.train.features import encode_features, split_by_patient
@@ -36,6 +36,8 @@ def evaluate_shap_stability(
     seed: int = 42,
 ) -> dict[str, Any]:
     """Compute mean Spearman rank correlation and top-3 overlap across 20 bootstrap runs."""
+    if not (data_dir / "stage_rows.parquet").exists():
+        generate_dataset(seed=42, out_dir=data_dir, artifacts_dir=artifacts_dir)
     stage_df = pd.read_parquet(data_dir / "stage_rows.parquet")
     _, _, test_df = split_by_patient(stage_df, seed=42)
     x_test_df = encode_features(test_df, columns=FEATURE_COLUMNS)

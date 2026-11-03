@@ -8,7 +8,7 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR
+from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR, generate_dataset
 from ml.data.schema import FEATURE_COLUMNS
 from ml.train.calibrate import predict_calibrated
 from ml.train.features import add_evaluation_slices, encode_features, split_by_patient
@@ -22,6 +22,8 @@ def evaluate_subgroup_fairness(
     threshold: float = 0.35,
 ) -> dict[str, Any]:
     """Compute FPR, FNR, and positive rates across demographic and clinical slices on test split."""
+    if not (data_dir / "stage_rows.parquet").exists():
+        generate_dataset(seed=42, out_dir=data_dir, artifacts_dir=artifacts_dir)
     stage_df = pd.read_parquet(data_dir / "stage_rows.parquet")
     _, _, test_df = split_by_patient(stage_df, seed=42)
 

@@ -10,7 +10,7 @@ from app.domain.states import LLMKind
 from app.llm.ads import compute_ads
 from app.llm.templates import build_template_output
 from app.llm.validators import validate_llm_output
-from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR
+from ml.data.generate import DEFAULT_ARTIFACTS_DIR, DEFAULT_OUT_DIR, generate_dataset
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,8 @@ def evaluate_llm_faithfulness(
     n_cases: int = 200,
 ) -> dict[str, Any]:
     """Evaluate 200 synthetic cases across grounded validators and ADS divergence audit."""
+    if not (data_dir / "cases.parquet").exists():
+        generate_dataset(seed=42, out_dir=data_dir, artifacts_dir=artifacts_dir)
     cases_df = pd.read_parquet(data_dir / "cases.parquet").head(n_cases)
 
     total_checks = 0
