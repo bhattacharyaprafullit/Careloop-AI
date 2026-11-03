@@ -3,6 +3,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -15,7 +16,13 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["health"])
 
 
-@router.get("/healthz")
+@router.api_route("/ping", methods=["GET", "HEAD"], response_class=PlainTextResponse)
+def ping() -> PlainTextResponse:
+    """Ultra-lightweight 2-byte keepalive endpoint for cron-job.org and uptime monitors."""
+    return PlainTextResponse("ok", headers={"Cache-Control": "no-store"})
+
+
+@router.api_route("/healthz", methods=["GET", "HEAD"])
 def healthz() -> dict[str, str | bool]:
     """Cheap liveness probe used by Hugging Face, the keepalive cron and the frontend."""
     settings = get_settings()
@@ -27,7 +34,7 @@ def healthz() -> dict[str, str | bool]:
     }
 
 
-@router.get("/healthz/db")
+@router.api_route("/healthz/db", methods=["GET", "HEAD"])
 def healthz_db(db: Annotated[Session, Depends(get_session)]) -> dict[str, str]:
     """Database connectivity probe (returns 503 with friendly envelope when DB is down)."""
     try:

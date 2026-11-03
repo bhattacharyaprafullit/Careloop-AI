@@ -1,6 +1,9 @@
 """M6 LLM tests: validators, invented numbers/dates, banned phrases, ADS, templates in en/hi/es."""
 import logging
 
+import pytest
+
+from app.core.config import get_settings
 from app.domain.states import LLMKind
 from app.llm.ads import ads_triggers_escalation, compute_ads
 from app.llm.client import generate_validated_llm_output
@@ -9,8 +12,9 @@ from app.llm.validators import validate_llm_output, word_count
 logger = logging.getLogger(__name__)
 
 
-def test_r3_message_in_patient_language() -> None:
+def test_r3_message_in_patient_language(monkeypatch: pytest.MonkeyPatch) -> None:
     """R3: Patient messages generated in en, hi, and es pass language stopword heuristic."""
+    monkeypatch.setattr(get_settings(), "groq_api_key", None)
     for lang in ("en", "hi", "es"):
         facts = {
             "language": lang,

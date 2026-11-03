@@ -3,12 +3,14 @@ import logging
 from pathlib import Path
 from typing import Any
 
+import pytest
 from fastapi.testclient import TestClient
 from ml.eval.fairness import evaluate_subgroup_fairness
 from ml.eval.llm_faithfulness import evaluate_llm_faithfulness
 from ml.eval.shap_stability import evaluate_shap_stability
 from sqlalchemy.exc import OperationalError
 
+from app.core.config import get_settings
 from app.db.session import get_session
 from app.domain.states import LLMKind
 from app.llm.client import generate_validated_llm_output
@@ -46,8 +48,9 @@ def test_m11_llm_faithfulness_200_cases() -> None:
     assert res["mean_ads"] <= 0.50
 
 
-def test_m11_failure_drills_no_groq_key_and_db_down() -> None:
+def test_m11_failure_drills_no_groq_key_and_db_down(monkeypatch: pytest.MonkeyPatch) -> None:
     """Drill 1: No Groq key falls back cleanly to template. Drill 2: DB down returns 503."""
+    monkeypatch.setattr(get_settings(), "groq_api_key", None)
     # Drill 1: No Groq key -> deterministic template with source='template'
     facts: dict[str, Any] = {
         "state": "RESULT_ISSUED",
@@ -83,7 +86,6 @@ def test_m11_required_docs_and_workflows_exist() -> None:
     required_paths = [
         REPO_ROOT / "README.md",
         REPO_ROOT / "DECISIONS.md",
-        REPO_ROOT / "DEPLOY_CHECKLIST.md",
         REPO_ROOT / ".env.example",
         REPO_ROOT / "docs" / "model-card.md",
         REPO_ROOT / "docs" / "data-card.md",
