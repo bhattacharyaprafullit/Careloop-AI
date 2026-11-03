@@ -17,16 +17,20 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
     const stored = (typeof window !== "undefined" ? localStorage.getItem("careloop-theme") : null) as Theme | null;
-    if (stored === "dark" || stored === "light") {
-      setThemeState(stored);
-      document.documentElement.classList.toggle("dark", stored === "dark");
-    } else if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    if (stored === "light") {
+      setThemeState("light");
+      document.documentElement.classList.remove("dark");
+    } else {
+      // Default to Dark Mode on initial open!
       setThemeState("dark");
       document.documentElement.classList.add("dark");
+      if (!stored && typeof window !== "undefined") {
+        localStorage.setItem("careloop-theme", "dark");
+      }
     }
   }, []);
 

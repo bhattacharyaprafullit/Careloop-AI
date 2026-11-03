@@ -34,14 +34,14 @@ export function errorMessage(err: unknown, fallback: string): string {
 export type Tone = "slate" | "sky" | "indigo" | "violet" | "rose" | "amber" | "teal" | "emerald";
 
 export const TONE_BADGE: Record<Tone, string> = {
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
-  sky: "bg-sky-50 text-sky-700 ring-sky-200",
-  indigo: "bg-indigo-50 text-indigo-700 ring-indigo-200",
-  violet: "bg-violet-50 text-violet-700 ring-violet-200",
-  rose: "bg-rose-50 text-rose-700 ring-rose-200",
-  amber: "bg-amber-50 text-amber-800 ring-amber-200",
-  teal: "bg-teal-50 text-teal-700 ring-teal-200",
-  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200",
+  slate: "bg-slate-100 text-slate-700 ring-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:ring-slate-700",
+  sky: "bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-950/80 dark:text-sky-300 dark:ring-sky-800",
+  indigo: "bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-950/80 dark:text-indigo-300 dark:ring-indigo-800",
+  violet: "bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-950/80 dark:text-violet-300 dark:ring-violet-800",
+  rose: "bg-rose-50 text-rose-700 ring-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:ring-rose-800",
+  amber: "bg-amber-50 text-amber-800 ring-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:ring-amber-800",
+  teal: "bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-950/80 dark:text-teal-300 dark:ring-teal-800",
+  emerald: "bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:ring-emerald-800",
 };
 
 export const TONE_DOT: Record<Tone, string> = {

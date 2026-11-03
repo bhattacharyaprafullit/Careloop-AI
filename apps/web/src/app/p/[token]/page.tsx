@@ -45,9 +45,7 @@ export default function PatientPortalPage({
     setBusy(true);
     setErrorMsg(null);
     try {
-      await apiFetch(`/api/v1/patient/${token}/acknowledge`, {
-        method: "POST",
-      });
+      await apiFetch(`/api/v1/patient/${token}/acknowledge`, { method: "POST" });
       setAckDone(true);
       await refetch();
     } catch (err) {
@@ -62,13 +60,10 @@ export default function PatientPortalPage({
     setBusy(true);
     setErrorMsg(null);
     try {
-      const res = await apiFetch<TeachBackResponse>(
-        `/api/v1/patient/${token}/teachback`,
-        {
-          method: "POST",
-          body: JSON.stringify({ reply_text: teachbackAnswer }),
-        }
-      );
+      const res = await apiFetch<TeachBackResponse>(`/api/v1/patient/${token}/teachback`, {
+        method: "POST",
+        body: JSON.stringify({ reply_text: teachbackAnswer }),
+      });
       setTeachbackResult(res);
       await refetch();
     } catch (err) {
@@ -89,7 +84,7 @@ export default function PatientPortalPage({
   if (!portalData) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-12">
-        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm font-semibold text-rose-800">
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm font-semibold text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-200">
           Patient portal link expired or invalid.
         </div>
       </main>
@@ -99,27 +94,27 @@ export default function PatientPortalPage({
   const activeLang = (selectedLang ?? portalData.language) as Language;
 
   return (
-    <main className="min-h-screen bg-slate-50/70 px-4 py-8 text-slate-900 antialiased">
+    <main className="min-h-screen bg-slate-50/70 px-4 py-8 text-slate-900 antialiased dark:bg-[#090d16] dark:text-slate-100">
       <div className="mx-auto max-w-3xl space-y-5">
         {/* Top Header Card */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
           <div>
             <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400">
                 <HeartHandshake className="h-4 w-4" />
               </span>
-              <p className="text-xs font-bold uppercase tracking-wider text-blue-700">
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
                 Patient Follow-Up Care (R3)
               </p>
             </div>
-            <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">
+            <h1 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl dark:text-white">
               Case {portalData.case_id}
             </h1>
-            <p className="mt-1 flex items-center gap-2 text-xs text-slate-600">
+            <p className="mt-1 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
               <Calendar className="h-3.5 w-3.5 text-slate-400" />
               <span>Target Due Date: <strong>{portalData.due_date}</strong></span>
               <span>•</span>
-              <span className="font-semibold text-slate-800">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">
                 {portalData.acknowledged || ackDone ? "Acknowledged" : "Awaiting Acknowledgement"}
               </span>
             </p>
@@ -135,7 +130,7 @@ export default function PatientPortalPage({
                 className={`rounded-xl px-3 py-1.5 text-xs font-bold transition-all ${
                   activeLang === lang
                     ? "bg-blue-600 text-white shadow-xs"
-                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                 }`}
               >
                 {lang === "en" ? "English" : lang === "hi" ? "हिन्दी" : "Español"}
@@ -143,7 +138,7 @@ export default function PatientPortalPage({
             ))}
             <Link
               href={`/app/cases/${portalData.case_id}`}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <ArrowLeft className="h-3 w-3" />
               <span>Coord View</span>
@@ -155,9 +150,9 @@ export default function PatientPortalPage({
         <section
           aria-label="3-step patient progress tracker"
           data-testid="patient-3-step-tracker"
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs"
+          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900"
         >
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
             Your 3-Step Care Loop Journey
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -166,18 +161,18 @@ export default function PatientPortalPage({
                 key={idx}
                 className={`rounded-2xl border p-4 transition ${
                   st.done
-                    ? "border-emerald-300 bg-emerald-50/70 text-emerald-950"
-                    : "border-slate-200 bg-slate-50/60 text-slate-700"
+                    ? "border-emerald-300 bg-emerald-50/70 text-emerald-950 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-200"
+                    : "border-slate-200 bg-slate-50/60 text-slate-700 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300"
                 }`}
               >
                 <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
                   <span>Step {idx + 1}</span>
                   {st.done ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-700">
+                    <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
                       <CheckCircle2 className="h-3.5 w-3.5" /> Done
                     </span>
                   ) : (
-                    <span className="text-slate-600 font-normal">Next Step</span>
+                    <span className="text-slate-600 font-normal dark:text-slate-400">Next Step</span>
                   )}
                 </div>
                 <div className="mt-2 text-sm font-bold leading-snug">{st.label}</div>
@@ -187,13 +182,13 @@ export default function PatientPortalPage({
         </section>
 
         {/* Multilingual Message */}
-        <section className="rounded-3xl border border-blue-200 bg-gradient-to-br from-white to-blue-50/30 p-6 shadow-xs">
-          <div className="flex items-center justify-between border-b border-blue-100 pb-3">
-            <h2 className="text-sm font-bold text-slate-900">
+        <section className="rounded-3xl border border-blue-200 bg-gradient-to-br from-white to-blue-50/30 p-6 shadow-xs dark:border-blue-900/40 dark:from-slate-900 dark:to-slate-900/60">
+          <div className="flex items-center justify-between border-b border-blue-100 pb-3 dark:border-slate-800">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
               Message from Your Care Team ({activeLang.toUpperCase()})
             </h2>
             {portalData.language_fallback && (
-              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-900">
+              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                 English Fallback
               </span>
             )}
@@ -201,12 +196,12 @@ export default function PatientPortalPage({
 
           <p
             data-testid="patient-message-body"
-            className="mt-4 text-base leading-relaxed text-slate-800"
+            className="mt-4 text-base leading-relaxed text-slate-800 dark:text-slate-200"
           >
             {portalData.status_text}
           </p>
 
-          <div className="mt-4 rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4 text-xs font-semibold text-blue-950">
+          <div className="mt-4 rounded-2xl border border-blue-200/80 bg-blue-50/60 p-4 text-xs font-semibold text-blue-950 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200">
             <strong>Next Action:</strong> {portalData.next_step_text}
           </div>
 
@@ -224,7 +219,7 @@ export default function PatientPortalPage({
             {(ackDone || portalData.acknowledged) && (
               <span
                 data-testid="ack-confirmed-badge"
-                className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 animate-pop"
+                className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 animate-pop dark:bg-emerald-950/70 dark:text-emerald-300"
               >
                 ✓ Acknowledgement recorded
               </span>
@@ -233,28 +228,19 @@ export default function PatientPortalPage({
         </section>
 
         {/* Teach-Back Confirmation Form */}
-        <form
-          onSubmit={(e) => void handleTeachBack(e)}
-          className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs"
-        >
-          <div className="border-b border-slate-100 pb-3">
-            <h2 className="text-sm font-bold text-slate-900">
-              Confirm Your Understanding (Teach-Back)
-            </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              In your own words, what is your next follow-up step?
-            </p>
+        <form onSubmit={(e) => void handleTeachBack(e)} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 pb-3 dark:border-slate-800">
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">Confirm Your Understanding (Teach-Back)</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">In your own words, what is your next follow-up step?</p>
           </div>
-
           <textarea
             aria-label="Your teach-back response"
             data-testid="teachback-input"
             rows={3}
             value={teachbackAnswer}
             onChange={(e) => setTeachbackAnswer(e.target.value)}
-            className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-xs leading-relaxed text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-hidden"
+            className="mt-4 w-full rounded-2xl border border-slate-200 bg-slate-50/50 p-3.5 text-xs leading-relaxed text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
-
           <div className="mt-3.5 flex flex-wrap items-center gap-2">
             <button
               type="submit"
@@ -269,7 +255,7 @@ export default function PatientPortalPage({
               type="button"
               data-testid="fill-confused-btn"
               onClick={() => setTeachbackAnswer("I am not sure what to do or where to go.")}
-              className="rounded-xl border border-slate-200 px-3 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50"
+              className="rounded-xl border border-slate-200 px-3 py-2 text-[11px] font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
             >
               Test &ldquo;Confused&rdquo; Response
             </button>
@@ -281,8 +267,8 @@ export default function PatientPortalPage({
               data-testid="teachback-result-banner"
               className={`mt-4 rounded-2xl border p-4 text-xs animate-pop ${
                 teachbackResult.label === "understood"
-                  ? "border-emerald-300 bg-emerald-50/80 text-emerald-950"
-                  : "border-amber-300 bg-amber-50/80 text-amber-950"
+                  ? "border-emerald-300 bg-emerald-50/80 text-emerald-950 dark:border-emerald-800/60 dark:bg-emerald-950/40 dark:text-emerald-200"
+                  : "border-amber-300 bg-amber-50/80 text-amber-950 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
               }`}
             >
               <div className="font-black text-sm">
@@ -297,7 +283,7 @@ export default function PatientPortalPage({
           )}
 
           {errorMsg && (
-            <p className="mt-3 text-xs font-semibold text-rose-700">{errorMsg}</p>
+            <p className="mt-3 text-xs font-semibold text-rose-700 dark:text-rose-400">{errorMsg}</p>
           )}
         </form>
       </div>

@@ -133,41 +133,142 @@ html.dark body {
   color: #f8fafc;
 }
 
-html.dark .bg-white {
+html.dark [class*="bg-white"] {
   background-color: #111827 !important;
 }
 
-html.dark .border-slate-200,
-html.dark .border-slate-200\/80,
-html.dark .border-slate-100 {
-  border-color: #1f2937 !important;
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-100"] {
+  border-color: #1e293b !important;
 }
 
 html.dark .text-slate-900 {
-  color: #f9fafb !important;
+  color: #f8fafc !important;
 }
 
 html.dark .text-slate-800 {
-  color: #f3f4f6 !important;
+  color: #f1f5f9 !important;
 }
 
 html.dark .text-slate-700 {
-  color: #e5e7eb !important;
+  color: #e2e8f0 !important;
 }
 
 html.dark .text-slate-600 {
-  color: #9ca3af !important;
+  color: #cbd5e1 !important;
 }
 
-html.dark .bg-slate-50,
-html.dark .bg-slate-50\/50,
-html.dark .bg-slate-50\/60,
-html.dark .bg-slate-50\/70 {
+html.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.dark [class*="bg-slate-50"] {
   background-color: #0f172a !important;
 }
 
-html.dark .bg-slate-100 {
+html.dark [class*="bg-slate-100"] {
   background-color: #1e293b !important;
+}
+
+/* Dark mode inputs, selects, and textareas */
+html.dark input[type="text"],
+html.dark input[type="search"],
+html.dark input[type="number"],
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html.dark select,
+html.dark textarea {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+html.dark select option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Dark mode high-contrast action buttons */
+html.dark button.bg-slate-900,
+html.dark a.bg-slate-900,
+html.dark .bg-slate-900:not(pre) {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(147, 197, 253, 0.25) !important;
+}
+html.dark button.bg-slate-900:hover,
+html.dark a.bg-slate-900:hover,
+html.dark .bg-slate-900:hover:not(pre) {
+  background-color: #1d4ed8 !important;
+}
+
+/* Dark mode alerts & badges with high-contrast text */
+html.dark [class*="bg-blue-50"] {
+  background-color: rgba(30, 58, 138, 0.35) !important;
+}
+html.dark [class*="text-blue-900"],
+html.dark [class*="text-blue-950"],
+html.dark [class*="text-blue-800"],
+html.dark [class*="text-blue-700"] {
+  color: #93c5fd !important;
+}
+
+html.dark [class*="bg-emerald-50"] {
+  background-color: rgba(6, 78, 59, 0.35) !important;
+}
+html.dark [class*="text-emerald-900"],
+html.dark [class*="text-emerald-950"],
+html.dark [class*="text-emerald-800"],
+html.dark [class*="text-emerald-700"] {
+  color: #6ee7b7 !important;
+}
+
+html.dark [class*="bg-amber-50"] {
+  background-color: rgba(120, 53, 15, 0.35) !important;
+}
+html.dark [class*="text-amber-900"],
+html.dark [class*="text-amber-950"],
+html.dark [class*="text-amber-800"],
+html.dark [class*="text-amber-700"] {
+  color: #fcd34d !important;
+}
+
+html.dark [class*="bg-rose-50"] {
+  background-color: rgba(136, 19, 55, 0.35) !important;
+}
+html.dark [class*="text-rose-900"],
+html.dark [class*="text-rose-950"],
+html.dark [class*="text-rose-800"],
+html.dark [class*="text-rose-700"] {
+  color: #fda4af !important;
+}
+
+html.dark [class*="bg-purple-50"] {
+  background-color: rgba(88, 28, 135, 0.35) !important;
+}
+html.dark [class*="text-purple-900"],
+html.dark [class*="text-purple-950"],
+html.dark [class*="text-purple-800"],
+html.dark [class*="text-purple-700"] {
+  color: #d8b4fe !important;
+}
+
+/* Dark mode table rows */
+html.dark table tbody tr:hover {
+  background-color: rgba(30, 58, 138, 0.2) !important;
+}
+html.dark table tbody tr {
+  border-color: #1e293b !important;
+}
+html.dark thead {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
 }
 
 ::selection {
