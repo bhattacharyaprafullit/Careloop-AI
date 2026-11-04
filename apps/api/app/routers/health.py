@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["health"])
 
 
+@router.api_route("/", methods=["GET", "HEAD"], response_class=PlainTextResponse)
 @router.api_route("/ping", methods=["GET", "HEAD"], response_class=PlainTextResponse)
 def ping() -> PlainTextResponse:
     """Ultra-lightweight 2-byte keepalive endpoint for cron-job.org and uptime monitors."""
