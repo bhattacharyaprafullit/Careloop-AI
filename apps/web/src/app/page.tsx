@@ -14,7 +14,6 @@ import {
   Clock,
   MessageSquare,
   BarChart3,
-  Network,
 } from "lucide-react";
 import { ensureSandboxToken } from "@/lib/api";
 import { useSandbox } from "@/hooks/use-sandbox";
@@ -113,19 +112,19 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-12">
         <div className="flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-blue-800 shadow-2xs backdrop-blur-xs">
+          <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-3.5 py-1.5 text-xs font-semibold text-blue-800 shadow-2xs backdrop-blur-xs dark:border-blue-900/60 dark:bg-slate-900/90 dark:text-blue-300">
             <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
             <span>Closing the Screening-to-Care Loop</span>
-            <span className="text-slate-300">•</span>
-            <span className="text-slate-600 font-mono">R1–R6 Specification</span>
+            <span className="text-slate-300 dark:text-slate-600">•</span>
+            <span className="text-slate-600 font-mono dark:text-slate-400">R1–R6 Specification</span>
           </div>
 
-          <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-6xl sm:leading-[1.1]">
+          <h1 className="mt-6 text-4xl font-black tracking-tight text-slate-900 sm:text-6xl sm:leading-[1.1] dark:text-white">
             Every Abnormal Screening. <br className="hidden sm:inline" />
             <span className="text-gradient">Zero Cases Lost in the Loop.</span>
           </h1>
 
-          <p className="mt-5 max-w-2xl text-base text-slate-600 sm:text-lg leading-relaxed">
+          <p className="mt-5 max-w-2xl text-base text-slate-600 sm:text-lg leading-relaxed dark:text-slate-300">
             CareLoop AI bridges the gap between abnormal screening results and completed care by coordinating
             patient notifications, confirmatory tests, specialist referrals, and follow-ups — with explainable
             ML prioritization, patient understanding checks, and safety-governed human oversight.
@@ -157,17 +156,17 @@ export default function Home() {
             <Link
               href="/app/model-card"
               data-testid="model-card-link"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:bg-white hover:text-slate-900 active:scale-98"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:bg-white hover:text-slate-900 active:scale-98 dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
             >
-              <FileText className="h-4 w-4 text-slate-500" />
+              <FileText className="h-4 w-4 text-slate-500 dark:text-slate-400" />
               <span>Model Card & Audits</span>
             </Link>
 
             <Link
               href="/app/metrics"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:bg-white hover:text-slate-900 active:scale-98"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 shadow-2xs backdrop-blur-xs transition hover:bg-white hover:text-slate-900 active:scale-98 dark:border-slate-700 dark:bg-slate-800/90 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white"
             >
-              <Activity className="h-4 w-4 text-slate-500" />
+              <Activity className="h-4 w-4 text-slate-500 dark:text-slate-400" />
               <span>FIFO vs CareLoop Simulation</span>
             </Link>
           </div>
@@ -186,21 +185,21 @@ export default function Home() {
             return (
               <div
                 key={p.title}
-                className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-gradient-to-br ${p.color} shadow-2xs`}>
+                    <span className={`flex h-10 w-10 items-center justify-center rounded-xl border bg-gradient-to-br ${p.color} shadow-2xs dark:border-slate-700`}>
                       <Icon className="h-5 w-5" />
                     </span>
-                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                       {p.tag}
                     </span>
                   </div>
-                  <h3 className="mt-4 text-sm font-bold text-slate-900 group-hover:text-blue-700 transition">
+                  <h3 className="mt-4 text-sm font-bold text-slate-900 group-hover:text-blue-700 transition dark:text-white dark:group-hover:text-blue-400">
                     {p.title}
                   </h3>
-                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed">
+                  <p className="mt-1.5 text-xs text-slate-600 leading-relaxed dark:text-slate-400">
                     {p.desc}
                   </p>
                 </div>
@@ -211,12 +210,12 @@ export default function Home() {
 
         {/* Clinical Problem vs Solution */}
         <div className="mt-10 grid gap-5 md:grid-cols-2">
-          <div className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-6 shadow-2xs">
-            <div className="flex items-center gap-2 text-rose-700">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-700">✕</span>
-              <h2 className="text-base font-bold text-slate-900">The Challenge: Loop Breakage</h2>
+          <div className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-6 shadow-2xs dark:border-rose-900/50 dark:bg-rose-950/20">
+            <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300">✕</span>
+              <h2 className="text-base font-bold text-slate-900 dark:text-rose-100">The Challenge: Loop Breakage</h2>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-slate-600">
+            <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
               Abnormal FIT, Mammography, and Pap/HPV screenings stall across fragmented transitions:
               silent notifications, unverified patient comprehension, unassigned drop-offs,
               and capacity-rejected referrals left without closure. Over 30% of high-risk patients
@@ -224,66 +223,18 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-6 shadow-2xs">
-            <div className="flex items-center gap-2 text-blue-700">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700">✓</span>
-              <h2 className="text-base font-bold text-slate-900">The CareLoop Guarantee</h2>
+          <div className="rounded-2xl border border-blue-200/80 bg-blue-50/40 p-6 shadow-2xs dark:border-blue-900/50 dark:bg-blue-950/20">
+            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">✓</span>
+              <h2 className="text-base font-bold text-slate-900 dark:text-blue-100">The CareLoop Guarantee</h2>
             </div>
-            <p className="mt-3 text-xs leading-relaxed text-slate-600">
+            <p className="mt-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
               Deterministic 11-stage transitions guarantee every case has an assigned owner, active SLA countdown,
               and documented evidence before closure. ML models prioritize highest-risk drop-offs,
               while LangGraph halts automated routing whenever human clinical judgment is required.
             </p>
           </div>
         </div>
-
-        {/* Architecture & Governance Pipeline */}
-        <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-2.5">
-              <Network className="h-5 w-5 text-blue-600" />
-              <h2 className="text-base font-bold text-slate-900">System Architecture & Governance Pipeline</h2>
-            </div>
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600">
-              Pure Domain • Fast-Inference ML • Audit Ledger
-            </span>
-          </div>
-
-          <pre
-            aria-label="Architecture diagram"
-            className="mt-4 overflow-x-auto rounded-xl bg-slate-950 p-4 font-mono text-[11px] leading-relaxed text-slate-200 shadow-inner"
-          >
-            {`[Screening Result Issued (FIT, Mammography, Pap/HPV)]
-        │
-        ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│ Pure Domain Engine (apps/api/app/domain)                               │
-│  • 11-State Lifecycle: Owner Role & SLA Clock (Urgent tier halves SLA) │
-│  • Multi-Factor Priority: 100 * (0.45*Urgency + 0.35*P_drop + 0.20*SLA)│
-│  • Strict Evidence Closure Gate: Requires proof or clinician override  │
-└────────────────────────────────────────────────────────────────────────┘
-        │
-        ├──► [Explainable Risk Engine • Calibrated Drop-Off Scoring & Survival S(t)]
-        ├──► [Faithful Clinical Assistant • Grounded Summaries & SBAR Hand-Offs]
-        └──► [Human-in-the-Loop Orchestration • State-Preserving Clinical Gates]
-                   │
-                   ├── Coordinator Queue & SLA Countdown (R1, R2)
-                   ├── Multilingual Patient Portal & Teach-Back (R3)
-                   ├── Clinician Desk: SBAR Referral Hand-Offs (R4)
-                   └── Append-Only Audit Trail & Queue Simulation (R6)`}
-          </pre>
-        </div>
-
-        {/* Clinical Safety Banner */}
-        <aside className="mt-8 flex items-center gap-3.5 rounded-2xl border border-amber-300/80 bg-amber-50/70 p-5 text-amber-950 shadow-2xs">
-          <ShieldCheck className="h-5 w-5 shrink-0 text-amber-600" />
-          <div className="text-xs leading-relaxed">
-            <strong className="font-bold text-amber-900">Clinical Safety & Synthetic Data Notice:</strong>{" "}
-            CareLoop AI is an assistive decision-support platform operating on 100% synthetic patient records.
-            It never diagnoses conditions, never prescribes medications, and never closes or escalates urgent
-            cases without documented evidence or authorized human clinical sign-off.
-          </div>
-        </aside>
       </section>
     </div>
   );
