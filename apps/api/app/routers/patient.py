@@ -2,7 +2,7 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 
 from app.deps import DbSession
 from app.schemas.patient import (
@@ -26,18 +26,20 @@ def get_patient_page(
     token: str,
     db: DbSession,
     lang: str | None = None,
+    x_sandbox_token: str | None = Header(default=None, alias="X-Sandbox-Token"),
 ) -> PatientPortalResponse:
     """Return patient-friendly 3-step tracker, localized message, and due date."""
-    return get_patient_portal_view(db, token, lang_override=lang)
+    return get_patient_portal_view(db, token, lang_override=lang, sandbox_token=x_sandbox_token)
 
 
 @router.post("/patient/{token}/acknowledge")
 def post_patient_acknowledge(
     token: str,
     db: DbSession,
+    x_sandbox_token: str | None = Header(default=None, alias="X-Sandbox-Token"),
 ) -> dict[str, Any]:
     """Acknowledge receipt of screening result ("I understand" button)."""
-    return acknowledge_patient_result(db, token)
+    return acknowledge_patient_result(db, token, sandbox_token=x_sandbox_token)
 
 
 @router.post("/patient/{token}/teachback", response_model=TeachBackResponse)
@@ -45,6 +47,7 @@ def post_patient_teachback(
     token: str,
     body: TeachBackRequest,
     db: DbSession,
+    x_sandbox_token: str | None = Header(default=None, alias="X-Sandbox-Token"),
 ) -> TeachBackResponse:
     """Submit teach-back confirmation text and classify as understood, partial, or confused."""
-    return submit_patient_teachback(db, token, body.reply_text)
+    return submit_patient_teachback(db, token, body.reply_text, sandbox_token=x_sandbox_token)

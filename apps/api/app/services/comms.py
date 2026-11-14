@@ -1,5 +1,6 @@
 """Patient communication, acknowledgement, and teach-back service (M8)."""
 import logging
+import re
 from datetime import timedelta
 from typing import Any
 
@@ -55,9 +56,32 @@ PORTAL_TEXT_BY_LANG: dict[str, dict[str, str]] = {
 }
 
 
-def _find_case_by_patient_token(db: Session, token: str) -> tuple[Case, Patient, Sandbox]:
-    th = hash_token(token.strip())
+def _find_case_by_patient_token(
+    db: Session, token: str, sandbox_token: str | None = None
+) -> tuple[Case, Patient, Sandbox]:
+    clean_tok = token.strip()
+    th = hash_token(clean_tok)
     c = db.scalar(select(Case).where(Case.patient_token_hash == th))
+
+    if c is None:
+        m = re.fullmatch(r"pt-seed-(\d{3})", clean_tok)
+        if m:
+            suffix = m.group(1)
+            sb_row: Sandbox | None = None
+            if sandbox_token:
+                sb_row = db.scalar(
+                    select(Sandbox).where(Sandbox.token_hash == hash_token(sandbox_token.strip()))
+                )
+            if sb_row is None:
+                sb_row = db.scalar(select(Sandbox).order_by(Sandbox.created_at.desc()))
+            if sb_row is not None:
+                c = db.scalar(
+                    select(Case).where(
+                        Case.sandbox_id == sb_row.id,
+                        Case.id == f"{sb_row.id[:8]}-case-{suffix}",
+                    )
+                )
+
     if c is None:
         raise AppError(404, "patient_token_not_found", "Invalid patient link token.")
     pat = db.scalar(select(Patient).where(Patient.id == c.patient_id))
@@ -68,10 +92,10 @@ def _find_case_by_patient_token(db: Session, token: str) -> tuple[Case, Patient,
 
 
 def get_patient_portal_view(
-    db: Session, token: str, lang_override: str | None = None
+    db: Session, token: str, lang_override: str | None = None, sandbox_token: str | None = None
 ) -> PatientPortalResponse:
     """Build localized 3-step patient portal view in en, hi, or es."""
-    c, pat, sb = _find_case_by_patient_token(db, token)
+    c, pat, sb = _find_case_by_patient_token(db, token, sandbox_token=sandbox_token)
     clock = clock_for_sandbox(sb)
     now = clock()
 
@@ -126,9 +150,11 @@ def get_patient_portal_view(
     )
 
 
-def acknowledge_patient_result(db: Session, token: str) -> dict[str, Any]:
+def acknowledge_patient_result(
+    db: Session, token: str, sandbox_token: str | None = None
+) -> dict[str, Any]:
     """Record patient acknowledgement, advance PATIENT_NOTIFIED -> ACKNOWLEDGED, and log event."""
-    c, _, sb = _find_case_by_patient_token(db, token)
+    c, _, sb = _find_case_by_patient_token(db, token, sandbox_token=sandbox_token)
     now = clock_for_sandbox(sb)()
     prev_state = c.state
     c.acknowledged = True
@@ -190,10 +216,10 @@ def acknowledge_patient_result(db: Session, token: str) -> dict[str, Any]:
 
 
 def submit_patient_teachback(
-    db: Session, token: str, reply_text: str
+    db: Session, token: str, reply_text: str, sandbox_token: str | None = None
 ) -> TeachBackResponse:
     """Evaluate patient teach-back reply, record Message & event, and escalate if confused."""
-    c, pat, sb = _find_case_by_patient_token(db, token)
+    c, pat, sb = _find_case_by_patient_token(db, token, sandbox_token=sandbox_token)
     now = clock_for_sandbox(sb)()
 
     facts = {
